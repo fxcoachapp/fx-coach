@@ -83,7 +83,7 @@ function publicUser(user) {
     id: user.id,
     name: user.name,
     email: user.email,
-    admin: !!user.admin || isAdminEmail(user.email),
+    admin: isAdminEmail(user.email),
     provider: user.provider || 'email',
     plan: user.plan,
     status: accessStatus(user),
@@ -110,7 +110,7 @@ function apiAccess(req, res, next) {
 }
 
 function requireAdmin(req, res, next) {
-  if (!req.user.admin && !isAdminEmail(req.user.email)) return res.status(403).json({ error: 'Admin only.' });
+  if (!isAdminEmail(req.user.email)) return res.status(403).json({ error: 'Admin only.' });
   next();
 }
 
@@ -139,7 +139,7 @@ const gateApp = (req, res, next) => {
   if (req.url.startsWith('/pay')) return next();
   if (req.url.startsWith('/admin')) {
     const user = users.findById(req.session.userId);
-    if (user && (user.admin || isAdminEmail(user.email))) return next();
+    if (user && isAdminEmail(user.email)) return next();
     return res.redirect('/app/dashboard.html');
   }
   const user = users.findById(req.session.userId);
