@@ -9,7 +9,7 @@ const rateLimit = require('express-rate-limit');
 const QRCode = require('qrcode');
 const bcrypt = require('bcryptjs');
 
-const { init, users, trades, payments, config, storageMode, hasUpstash, read: dbRead } = require('./lib/db');
+const { init, users, trades, payments, config, storageMode, hasUpstash, read: dbRead, timed: timedCall } = require('./lib/db');
 const { PLAN_PRICE, PLAN_CURRENCY, TRIAL_DAYS, REFERRAL_THRESHOLD, REFERRAL_BONUS_DAYS, accessStatus, renewalDate, extendPremium } = require('./lib/subscription');
 const { getQuotes } = require('./lib/forex');
 const marketLib = require('./lib/market');
@@ -72,7 +72,7 @@ class UpstashSessionStore extends session.Store {
   }
   get(sid, cb) {
     if (this.missing) return cb(null, this.mem.get(sid) || null);
-    this.redis.get(this.prefix + sid).then((raw) => {
+    timedCall(this.redis.get(this.prefix + sid), 8000, 'upstash session get').then((raw) => {
       const sess = raw ? JSON.parse(raw) : null;
       if (sess) {
         const exp = sess.cookie && sess.cookie.expires ? new Date(sess.cookie.expires).getTime() : 0;
@@ -87,22 +87,22 @@ class UpstashSessionStore extends session.Store {
   }
   set(sid, sess, cb) {
     this.mem.set(sid, sess);
-    this.redis.set(this.prefix + sid, JSON.stringify(sess), { px: this._ttl(sess) })
+    timedCall(this.redis.set(this.prefix + sid, JSON.stringify(sess), { px: this._ttl(sess) }), 8000, 'upstash session set')
       .then(() => cb && cb())
       .catch((e) => { this._warn(); cb && cb(); });
   }
   touch(sid, sess, cb) { this.set(sid, sess, cb); }
   destroy(sid, cb) {
     this.mem.delete(sid);
-    this.redis.del(this.prefix + sid).then(() => { cb && cb(); }).catch((e) => { this._warn(); cb && cb(); });
+    timedCall(this.redis.del(this.prefix + sid), 8000, 'upstash session del').then(() => { cb && cb(); }).catch((e) => { this._warn(); cb && cb(); });
   }
 }
 
 async function probeUpstash() {
   try {
     const r = sessionStore.redis;
-    await r.set('fx:probe', 'ok');
-    const got = await r.get('fx:probe');
+    await timedCall(r.set('fx:probe', 'ok'), 8000, 'upstash probe');
+    const got = await timedCall(r.get('fx:probe'), 8000, 'upstash probe');
     return got === 'ok' ? null : 'probe mismatch (got ' + JSON.stringify(got) + ')';
   } catch (e) {
     return String(e.message || e);
@@ -457,8 +457,8 @@ app.get('/api/admin/storage', apiUser, requireAdmin, async (req, res) => {
   if (hasUpstash) {
     try {
       const r = sessionStore.redis;
-      await r.set('fx:diag', 'ok');
-      ping = (await r.get('fx:diag')) === 'ok' ? 'ok' : 'mismatch';
+      await timedCall(r.set('fx:diag', 'ok'), 8000, 'upstash diag');
+      ping = (await timedCall(r.get('fx:diag'), 8000, 'upstash diag')) === 'ok' ? 'ok' : 'mismatch';
     } catch (e) {
       ping = 'ERROR: ' + String(e && e.message || e).slice(0, 300);
     }

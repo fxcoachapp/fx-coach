@@ -21,7 +21,7 @@ async function ensureCsrf(force) {
 
 async function getMe() {
   try {
-    const res = await fetch('/api/auth/me', { headers: { 'Accept': 'application/json' } });
+    const res = await fetch('/api/auth/me', { headers: { 'Accept': 'application/json' }, signal: AbortSignal.timeout(15000) });
     if (res.status === 401) { location.href = '/login.html'; return null; }
     const data = await res.json();
     return data.user || null;
@@ -34,7 +34,7 @@ async function api(path, method, body, _retried) {
   const opts = { method: method || 'GET', headers: { 'Accept': 'application/json' } };
   opts.headers['X-CSRF-Token'] = await ensureCsrf();
   if (body) { opts.headers['Content-Type'] = 'application/json'; opts.body = JSON.stringify(body); }
-  const res = await fetch(path, opts);
+  const res = await fetch(path, Object.assign(opts, { signal: AbortSignal.timeout(20000) }));
   if (res.status === 401) { location.href = '/login.html'; throw new Error('Not logged in.'); }
   const data = await res.json().catch(() => ({}));
   if (res.status === 403 && !_retried && /security token/i.test(data.error || '')) {
