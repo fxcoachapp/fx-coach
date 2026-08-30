@@ -339,23 +339,24 @@ app.get('/api/referrals', apiUser, async (req, res) => {
   });
 });
 
-function oauthStateFor(remember) {
+function oauthStateFor(remember, ref) {
   const rnd = crypto.randomBytes(12).toString('hex');
   const sig = crypto.createHmac('sha256', process.env.SESSION_SECRET || 'dev-secret-change-me').update(rnd).digest('hex').slice(0, 24);
-  return rnd + ':' + sig + ':' + (remember ? 'R' : 'T');
+  return rnd + ':' + sig + ':' + (remember ? 'R' : 'T') + (ref ? ':' + ref : '');
 }
 
 function verifyOAuthState(state) {
   const parts = String(state || '').split(':');
-  if (parts.length !== 3) return null;
+  if (parts.length < 3) return null;
   const [rnd, sig, tag] = parts;
   const expect = crypto.createHmac('sha256', process.env.SESSION_SECRET || 'dev-secret-change-me').update(rnd).digest('hex').slice(0, 24);
   if (sig !== expect) return null;
-  return tag === 'R';
+  return { remember: tag === 'R', ref: parts[3] || null };
 }
 
 app.get('/api/auth/google', (req, res) => {
-  const state = oauthStateFor(req.query.remember === '1');
+  const ref = /^[A-Z0-9]{4,20}$/i.test(String(req.query.ref || '')) ? String(req.query.ref).trim().toUpperCase() : null;
+  const state = oauthStateFor(req.query.remember === '1' || !!ref, ref);
   const redirectUri = req.protocol + '://' + req.get('host') + '/api/auth/google/callback';
   const url = oauth.authUrl(state, redirectUri);
   if (!url) return res.redirect('/login.html?error=not_configured');
@@ -365,17 +366,17 @@ app.get('/api/auth/google', (req, res) => {
 app.get('/api/auth/google/callback', async (req, res) => {
   const { code, state, error } = req.query;
   if (error) return res.redirect('/login.html?error=google_denied');
-  const remember = verifyOAuthState(state);
-  if (remember === null) return res.redirect('/login.html?error=bad_state');
+  const oauthVerify = verifyOAuthState(state);
+  if (!oauthVerify) return res.redirect('/login.html?error=bad_state');
   try {
     const redirectUri = req.protocol + '://' + req.get('host') + '/api/auth/google/callback';
     const tokens = await oauth.exchangeCode(code, redirectUri);
     const profile = await oauth.fetchProfile(tokens);
-    const user = await oauth.upsertGoogleUser(profile);
+    const user = await oauth.upsertGoogleUser(profile, { ref: oauthVerify.ref });
     req.session.regenerate((regErr) => {
       if (regErr) return res.redirect('/login.html?error=google_failed&detail=session');
       req.session.userId = user.id;
-      applyRemember(req.session, remember);
+      applyRemember(req.session, oauthVerify.remember);
       res.redirect('/app/dashboard.html');
     });
   } catch (e) {

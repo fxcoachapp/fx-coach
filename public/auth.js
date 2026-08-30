@@ -31,6 +31,7 @@
     const syncRememberUrl = () => {
       if (googleLink) {
         const url = new URL(googleLink.getAttribute('href'), location.origin);
+        if (ref) url.searchParams.set('ref', ref);
         if (rememberEl.checked) url.searchParams.set('remember', '1');
         else url.searchParams.delete('remember');
         googleLink.setAttribute('href', url.pathname + url.search);
