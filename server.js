@@ -339,6 +339,19 @@ app.post('/api/admin/wallet/binance-fetch', apiUser, requireAdmin, async (req, r
   }
 });
 
+app.get('/api/admin/users', apiUser, requireAdmin, (req, res) => {
+  res.json({
+    users: users.all().map((u) => ({
+      email: u.email,
+      name: u.name,
+      provider: u.provider || 'email',
+      plan: u.plan,
+      status: accessStatus(u),
+      createdAt: u.createdAt
+    })).sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+  });
+});
+
 app.get('/api/admin/overview', apiUser, requireAdmin, (req, res) => {
   const all = users.all();
   const count = (pred) => all.filter(pred).length;

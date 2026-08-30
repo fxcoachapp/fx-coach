@@ -7,6 +7,27 @@ function statusPill(status) {
   return `<span class="status-pill badge-${cls}">${label}</span>`;
 }
 
+async function loadUsers() {
+  const data = await api('/api/admin/users');
+  const el = document.getElementById('usersTable');
+  document.getElementById('usersCount').textContent = '(' + data.users.length + ')';
+  if (!data.users.length) { el.innerHTML = '<p class="empty">No users yet.</p>'; return; }
+  el.innerHTML = `
+    <div style="overflow-x:auto">
+    <table class="tbl">
+      <tr><th>Email</th><th>Name</th><th>Account</th><th>Plan</th><th>Status</th><th>Joined</th></tr>
+      ${data.users.map((u) => `
+        <tr>
+          <td>${escapeHtml(u.email)}${u.email === __me.email ? ' <span class="badge badge-active">you</span>' : ''}</td>
+          <td>${escapeHtml(u.name)}</td>
+          <td><span class="badge ${u.provider === 'google' ? 'badge-trial' : 'badge-be'}">${u.provider === 'google' ? 'Google' : 'Email'}</span></td>
+          <td class="small">${u.plan}</td>
+          <td>${statusPill(u.status)}</td>
+          <td class="small">${new Date(u.createdAt).toLocaleDateString()}</td>
+        </tr>`).join('')}
+    </table></div>`;
+}
+
 async function loadOverview() {
   const data = await api('/api/admin/overview');
   document.getElementById('oUsers').textContent = data.users;
@@ -99,7 +120,9 @@ document.querySelectorAll('[data-fetch]').forEach((b) => b.addEventListener('cli
 initApp().then((user) => {
   if (!user) return;
   if (!user.admin) { location.href = '/app/dashboard.html'; return; }
+  window.__me = user;
   loadOverview();
+  loadUsers();
   loadPayments();
   loadWallet();
 });
