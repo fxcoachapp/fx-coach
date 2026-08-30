@@ -1,6 +1,7 @@
 require('dotenv').config();
 
 const path = require('path');
+const fs = require('fs');
 const crypto = require('crypto');
 const express = require('express');
 const session = require('express-session');
@@ -238,6 +239,25 @@ app.use((req, res, next) => {
   }
   next();
 });
+
+const CACHE_BUST = process.env.RENDER_DEPLOY_ID || ('v' + process.hrtime.bigint().toString(36));
+const PUBLIC_DIR = path.join(__dirname, 'public');
+app.use((req, res, next) => {
+  let rel = null;
+  if (req.path === '/') rel = 'index.html';
+  else if (/\.html$/i.test(req.path)) rel = req.path.replace(/^\/+/, '');
+  else return next();
+  const file = path.join(PUBLIC_DIR, rel);
+  fs.readFile(file, (err, buf) => {
+    if (err) return next();
+    const html = buf.toString()
+      .replace(/((?:src|href)=")(\/[^"]+\.(?:js|css))"/g, '$1$2?v=' + CACHE_BUST + '"');
+    res.type('html');
+    res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+    res.send(html);
+  });
+});
+
 app.use(express.static(path.join(__dirname, 'public')));
 app.get('/', (req, res) => res.sendFile(path.join(__dirname, 'public', 'index.html')));
 
