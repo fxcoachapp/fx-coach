@@ -646,6 +646,33 @@ app.post('/api/admin/grant-vip', apiUser, requireAdmin, async (req, res) => {
   res.json({ ok: true, user: { email: user.email, name: user.name, plan: user.plan, planEnds: user.planEnds, status: accessStatus(user) } });
 });
 
+app.post('/api/admin/users', apiUser, requireAdmin, async (req, res) => {
+  const { email, name, password, days } = req.body || {};
+  if (!email || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(String(email))) {
+    return res.status(400).json({ error: 'Enter a valid email.' });
+  }
+  const pw = String(password || '');
+  if (pw.length < 6 || pw.length > 200) return res.status(400).json({ error: 'Password must be 6+ characters.' });
+  if (users.findByEmail(email)) return res.status(409).json({ error: 'An account with this email already exists.' });
+  const d = Math.min(parseInt(days, 10) || 30, 3650);
+  const user = users.create({
+    email: String(email).toLowerCase().trim(),
+    name: String(name || '').trim() || String(email).split('@')[0],
+    passwordHash: await bcrypt.hash(pw, 10),
+    admin: false,
+    plan: 'active',
+    trialEnds: null,
+    planEnds: new Date(Date.now() + d * 24 * 60 * 60 * 1000).toISOString(),
+    watchlist: ['EURUSD', 'GBPUSD', 'USDJPY'],
+    refCode: makeRefCode(),
+    refBy: null,
+    confirmedRefs: 0,
+    createdAt: new Date().toISOString()
+  });
+  await users.save(user);
+  res.json({ ok: true, user: { email: user.email, name: user.name, plan: user.plan, planEnds: user.planEnds, status: accessStatus(user) } });
+});
+
 app.get('/api/journal', apiUser, apiAccess, (req, res) => {
   const list = trades.byUser(req.user.id).sort((a, b) => new Date(b.openedAt) - new Date(a.openedAt));
   res.json({ trades: list });

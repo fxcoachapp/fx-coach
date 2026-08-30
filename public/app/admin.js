@@ -210,6 +210,32 @@ document.getElementById('fetchAll').addEventListener('click', async () => {
 
 grantVip();
 
+function addUser() {
+  const form = document.getElementById('addUserForm');
+  const msg = document.getElementById('addUserMsg');
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    msg.textContent = 'Creating…';
+    try {
+      const res = await api('/api/admin/users', 'POST', {
+        email: document.getElementById('auEmail').value.trim(),
+        name: document.getElementById('auName').value.trim(),
+        password: document.getElementById('auPassword').value,
+        days: parseInt(document.getElementById('auDays').value || '30', 10)
+      });
+      msg.style.color = 'var(--accent)';
+      msg.textContent = 'Account created: ' + res.user.name + ' (' + res.user.email + ') — ' + res.user.status.toUpperCase() + ' until ' + new Date(res.user.planEnds).toLocaleDateString() + '. Credentials: email + the password you chose.';
+      loadOverview();
+      loadUsers();
+      document.getElementById('auPassword').value = '';
+    } catch (ex) {
+      msg.style.color = 'var(--danger)';
+      msg.textContent = ex.message;
+    }
+  });
+}
+addUser();
+
 initApp().then((user) => {
   if (!user) return;
   if (!user.admin) { location.href = '/app/dashboard.html'; return; }

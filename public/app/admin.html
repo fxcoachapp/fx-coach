@@ -59,7 +59,7 @@
 
     <h2 style="font-size:17px;margin:30px 0 12px">Grant VIP</h2>
     <div class="card">
-      <p class="small" style="margin-bottom:14px">Give any user instant Pro access by email. Counts toward nothing else — manual grants don't touch the referral program.</p>
+      <p class="small" style="margin-bottom:14px">Give any existing user instant Pro access by email. Counts toward nothing else — manual grants don't touch the referral program.</p>
       <form id="grantForm" style="display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end">
         <div class="field" style="flex:1;min-width:220px">
           <label for="gEmail">User email</label>
@@ -71,6 +71,31 @@
         </div>
         <button class="btn btn-primary" type="submit">Grant VIP</button>
         <span class="small" id="grantMsg"></span>
+      </form>
+    </div>
+
+    <h2 style="font-size:17px;margin:30px 0 12px">Add account</h2>
+    <div class="card">
+      <p class="small" style="margin-bottom:14px">Create a brand-new account that will <b>appear instantly in the Users list</b> (with the Pro days you choose). Never typed before — the owner can create invitee accounts that were invited but never registered, then hand over the credentials. The referral program stays untouched.</p>
+      <form id="addUserForm" style="display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end">
+        <div class="field" style="flex:1;min-width:200px">
+          <label for="auEmail">Email</label>
+          <input id="auEmail" type="email" required placeholder="new@gmail.com" autocomplete="off" />
+        </div>
+        <div class="field" style="flex:1;min-width:160px">
+          <label for="auName">Name</label>
+          <input id="auName" type="text" placeholder="Name" autocomplete="off" />
+        </div>
+        <div class="field" style="width:170px">
+          <label for="auPassword">Password</label>
+          <input id="auPassword" type="text" required placeholder="min 6 chars" autocomplete="off" />
+        </div>
+        <div class="field" style="width:120px">
+          <label for="auDays">Pro days</label>
+          <input id="auDays" type="number" min="1" max="3650" value="30" autocomplete="off" />
+        </div>
+        <button class="btn btn-primary" type="submit">Add account</button>
+        <span class="small" id="addUserMsg"></span>
       </form>
     </div>
 
