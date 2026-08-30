@@ -262,9 +262,12 @@ app.post('/api/auth/signup', async (req, res) => {
     createdAt: new Date().toISOString()
   };
   await users.save(user);
-  req.session.userId = user.id;
-  applyRemember(req.session, !!req.body.remember);
-  res.json({ ok: true, user: publicUser(user) });
+  req.session.regenerate((regErr) => {
+    if (regErr) return res.status(500).json({ error: 'Could not start session.' });
+    req.session.userId = user.id;
+    applyRemember(req.session, !!req.body.remember);
+    res.json({ ok: true, user: publicUser(user) });
+  });
 });
 
 app.post('/api/auth/login', async (req, res) => {
@@ -273,9 +276,12 @@ app.post('/api/auth/login', async (req, res) => {
   if (!user || !user.passwordHash || !(await bcrypt.compare(String(password || ''), user.passwordHash))) {
     return res.status(401).json({ error: 'Invalid email or password.' });
   }
-  req.session.userId = user.id;
-  applyRemember(req.session, !!req.body.remember);
-  res.json({ ok: true, user: publicUser(user) });
+  req.session.regenerate((regErr) => {
+    if (regErr) return res.status(500).json({ error: 'Could not start session.' });
+    req.session.userId = user.id;
+    applyRemember(req.session, !!req.body.remember);
+    res.json({ ok: true, user: publicUser(user) });
+  });
 });
 
 app.post('/api/auth/logout', (req, res) => {
@@ -323,9 +329,12 @@ app.get('/api/auth/google/callback', async (req, res) => {
     const tokens = await oauth.exchangeCode(code, redirectUri);
     const profile = await oauth.fetchProfile(tokens);
     const user = await oauth.upsertGoogleUser(profile);
-    req.session.userId = user.id;
-    applyRemember(req.session, remember);
-    res.redirect('/app/dashboard.html');
+    req.session.regenerate((regErr) => {
+      if (regErr) return res.redirect('/login.html?error=google_failed&detail=session');
+      req.session.userId = user.id;
+      applyRemember(req.session, remember);
+      res.redirect('/app/dashboard.html');
+    });
   } catch (e) {
     console.error('GOOGLE OAUTH ERROR:', e.message);
     res.redirect('/login.html?error=google_failed&detail=' + encodeURIComponent(String(e.message || 'unknown').slice(0, 200)));
