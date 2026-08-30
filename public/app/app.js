@@ -157,7 +157,13 @@ function celebrate(ms) {
 
 async function initApp() {
   const user = await getMe();
-  if (!user) return null;
+  if (!user) {
+    const b = document.createElement('div');
+    b.className = 'session-banner';
+    b.innerHTML = '⚠ Session error — please <a href="/login.html" style="color:inherit;text-decoration:underline;font-weight:700">log in again</a>.';
+    document.body.prepend(b);
+    return null;
+  }
   if (user.status === 'expired' && !location.pathname.endsWith('subscribe.html') && !location.pathname.endsWith('pay.html')) {
     location.href = '/app/subscribe.html';
     return null;

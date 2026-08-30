@@ -36,6 +36,8 @@ async function loadNetworks() {
         <div class="small">USDT · ${escapeHtml(n.short)}</div>
       </div>`);
   }
+  const hint = document.getElementById('netHint');
+  if (hint) hint.textContent = configured.length + ' payment network(s) available · tap one to continue.';
   el.querySelectorAll('.network-card').forEach((card) => card.addEventListener('click', async () => {
     await createPayment(card.dataset.net, card);
   }));
