@@ -37,7 +37,7 @@ async function loadUsers() {
           <td class="small">${u.invites} invited · <b>${u.confirmedRefs}</b> paid</td>
           <td>${u.paidTotal ? u.paidTotal.toFixed(0) + ' USDT' : '<span class="muted">—</span>'}</td>
           <td class="small">${new Date(u.createdAt).toLocaleDateString()}</td>
-          <td>${u.status === 'active' ? `<button class="btn btn-sm revoke-btn" data-email="${escapeHtml(u.email)}">Revoke</button>` : ''}<button class="btn btn-sm btn-ghost setpw-btn" data-id="${u.id}" title="Set / reset password">🔑</button></td>
+          <td>${u.status === 'active' ? `<button class="btn btn-sm revoke-btn" data-email="${escapeHtml(u.email)}">Revoke</button>` : ''}<button class="btn btn-sm btn-ghost setpw-btn" data-id="${u.id}" title="Set / reset password">🔑</button><button class="btn btn-sm btn-ghost linkref-btn" data-id="${u.id}" title="Attach / change referrer">🔗</button></td>
         </tr>`).join('')}
     </table></div>`;
   el.querySelectorAll('.revoke-btn').forEach((btn) => btn.addEventListener('click', revokeVip));
@@ -47,6 +47,16 @@ async function loadUsers() {
     try {
       await api('/api/admin/users/' + btn.dataset.id + '/password', 'POST', { password: pw });
       alert('Password set. Log in on the device with this email + new password.');
+    } catch (ex) { alert(ex.message); }
+  }));
+  el.querySelectorAll('.linkref-btn').forEach((btn) => btn.addEventListener('click', async () => {
+    const email = document.querySelector('.linkref-btn[data-id="' + btn.dataset.id + '"]').closest('tr').cells[0].innerText;
+    const referrer = prompt('Referrer email for ' + email + ' (blank = clear):\nThis counts the invitee in their invite list.');
+    if (referrer === null) return;
+    try {
+      const res = await api('/api/admin/users/' + btn.dataset.id + '/refby', 'POST', { email: referrer.trim() });
+      alert(('linked to ' + res.user.referrer + '.') || 'Referrer cleared.');
+      loadUsers();
     } catch (ex) { alert(ex.message); }
   }));
 }

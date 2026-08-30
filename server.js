@@ -608,6 +608,23 @@ app.get('/api/admin/users', apiUser, requireAdmin, (req, res) => {
   });
 });
 
+app.post('/api/admin/users/:id/refby', apiUser, requireAdmin, async (req, res) => {
+  const user = users.findById(req.params.id);
+  if (!user) return res.status(404).json({ error: 'User not found.' });
+  const referrerEmail = String((req.body || {}).email || '').trim();
+  if (!referrerEmail) {
+    user.refBy = null;
+    await users.save(user);
+    return res.json({ ok: true, user: { email: user.email, refBy: null } });
+  }
+  const referrer = users.findByEmail(referrerEmail);
+  if (!referrer) return res.status(404).json({ error: 'No account with that email.' });
+  if (!referrer.refCode) { referrer.refCode = makeRefCode(); await users.save(referrer); }
+  user.refBy = referrer.refCode;
+  await users.save(user);
+  res.json({ ok: true, user: { email: user.email, refBy: user.refBy, referrer: referrer.email } });
+});
+
 app.post('/api/admin/revoke-vip', apiUser, requireAdmin, async (req, res) => {
   const { email } = req.body || {};
   if (!email) return res.status(400).json({ error: 'Enter a valid email.' });
