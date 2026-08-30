@@ -452,6 +452,22 @@ app.post('/api/admin/payments/:id/cancel', apiUser, requireAdmin, async (req, re
   res.json({ ok: true });
 });
 
+app.post('/api/admin/payments/:id/reopen', apiUser, requireAdmin, async (req, res) => {
+  const p = payments.findById(req.params.id);
+  if (!p) return res.status(404).json({ error: 'Payment not found.' });
+  const amount = Number((req.body || {}).amount);
+  if (req.body && req.body.amount !== undefined && (!isFinite(amount) || amount <= 0)) {
+    return res.status(400).json({ error: 'Amount must be a positive number.' });
+  }
+  if (isFinite(amount) && amount > 0) p.amount = amount;
+  if (p.status !== 'paid') {
+    p.status = 'pending';
+    p.expiresAt = new Date(Date.now() + 2 * 60 * 60 * 1000).toISOString();
+  }
+  await payments.save(p);
+  res.json({ ok: true, payment: payments.findById(p.id) });
+});
+
 app.get('/api/admin/wallet', apiUser, requireAdmin, (req, res) => {
   res.json({ wallet: paymentsLib.walletConfig() });
 });

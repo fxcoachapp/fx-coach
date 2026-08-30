@@ -102,8 +102,8 @@ async function loadPayments() {
           ? `<a class="small" target="_blank" rel="noopener" href="${EXPLORERS[p.network] || ''}${p.confirmedTx}">${escapeHtml(p.confirmedTx.slice(0, 14))}…</a>`
           : '—';
         const actions = p.status === 'pending'
-          ? `<button class="btn btn-sm" data-confirm="${p.id}">✓ Confirm</button> <button class="btn btn-sm btn-ghost" data-cancel="${p.id}" style="color:var(--danger)">✕</button>`
-          : '—';
+          ? `<button class="btn btn-sm" data-confirm="${p.id}">✓ Confirm</button> <button class="btn btn-sm btn-ghost" data-cancel="${p.id}" style="color:var(--danger)">✕</button> <button class="btn btn-sm btn-ghost" data-edit="${p.id}" title="Edit amount">✏️</button>`
+          : `<button class="btn btn-sm" data-edit="${p.id}" title="Reopen (undo cancel)">✏️ Reopen</button>`;
         return `<tr>
           <td>${escapeHtml(p.userEmail)}</td>
           <td><span class="mono">${p.network}</span></td>
@@ -122,6 +122,16 @@ async function loadPayments() {
   el.querySelectorAll('[data-cancel]').forEach((b) => b.addEventListener('click', async () => {
     await api('/api/admin/payments/' + b.dataset.cancel + '/cancel', 'POST');
     loadPayments();
+  }));
+  el.querySelectorAll('[data-edit]').forEach((b) => b.addEventListener('click', async () => {
+    const id = b.dataset.edit;
+    const p = data.payments.find((x) => x.id === id);
+    const raw = prompt('New amount in USDT (Leave empty to keep ' + (p ? p.amount : '') + ' and just reopen):', p ? String(p.amount) : '');
+    if (raw === null) return;
+    const amount = raw.trim() === '' ? undefined : Number(raw);
+    if (amount !== undefined && (!isFinite(amount) || amount <= 0)) { err.textContent = 'Invalid amount.'; err.classList.add('show'); return; }
+    await api('/api/admin/payments/' + id + '/reopen', 'POST', amount !== undefined ? { amount } : {});
+    loadPayments(); loadOverview();
   }));
 }
 
