@@ -450,6 +450,29 @@ app.get('/api/admin/wallet', apiUser, requireAdmin, (req, res) => {
   res.json({ wallet: paymentsLib.walletConfig() });
 });
 
+app.get('/api/admin/storage', apiUser, requireAdmin, async (req, res) => {
+  const url = (process.env.UPSTASH_REDIS_REST_URL || '').trim();
+  const token = (process.env.UPSTASH_REDIS_REST_TOKEN || '').trim();
+  let ping = null;
+  if (hasUpstash) {
+    try {
+      const r = sessionStore.redis;
+      await r.set('fx:diag', 'ok');
+      ping = (await r.get('fx:diag')) === 'ok' ? 'ok' : 'mismatch';
+    } catch (e) {
+      ping = 'ERROR: ' + String(e && e.message || e).slice(0, 300);
+    }
+  }
+  res.json({
+    mode: storageMode,
+    upstashConfigured: !!hasUpstash,
+    urlHost: url ? String(url).replace(/^https?:\/\//, '').split('/')[0] : '(empty)',
+    tokenSet: !!token,
+    tokenTail: token ? token.slice(-6) : '',
+    ping
+  });
+});
+
 app.post('/api/admin/wallet', apiUser, requireAdmin, async (req, res) => {
   const b = req.body || {};
   const next = {};
