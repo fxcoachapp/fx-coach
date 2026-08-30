@@ -50,6 +50,7 @@ function renderNav(user) {
     ['dashboard', 'Dashboard', '/app/dashboard.html'],
     ['journal', 'Journal', '/app/journal.html'],
     ['calculator', 'Calculator', '/app/calculator.html'],
+    ['refer', 'Invite', '/app/refer.html'],
     ['subscribe', 'Plan', '/app/subscribe.html']
   ];
   if (user.admin) links.push(['admin', 'Admin', '/app/admin.html']);

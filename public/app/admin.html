@@ -55,6 +55,23 @@
       </div>
     </div>
 
+    <h2 style="font-size:17px;margin:30px 0 12px">Grant VIP</h2>
+    <div class="card">
+      <p class="small" style="margin-bottom:14px">Give any user instant Pro access by email. Counts toward nothing else — manual grants don't touch the referral program.</p>
+      <form id="grantForm" style="display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end">
+        <div class="field" style="flex:1;min-width:220px">
+          <label for="gEmail">User email</label>
+          <input id="gEmail" type="email" required placeholder="friend@email.com" autocomplete="off" />
+        </div>
+        <div class="field" style="width:120px">
+          <label for="gDays">Days</label>
+          <input id="gDays" type="number" min="1" max="3650" value="30" autocomplete="off" />
+        </div>
+        <button class="btn btn-primary" type="submit">Grant VIP</button>
+        <span class="small" id="grantMsg"></span>
+      </form>
+    </div>
+
     <h2 style="font-size:17px;margin:30px 0 12px">Users <span class="tag" id="usersCount"></span></h2>
     <div class="card">
       <div id="usersTable"><p class="empty">Loading…</p></div>

@@ -28,6 +28,29 @@ async function loadUsers() {
     </table></div>`;
 }
 
+function grantVip() {
+  const form = document.getElementById('grantForm');
+  const msg = document.getElementById('grantMsg');
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    msg.textContent = 'Working…';
+    try {
+      const res = await api('/api/admin/grant-vip', 'POST', {
+        email: document.getElementById('gEmail').value.trim(),
+        days: parseInt(document.getElementById('gDays').value || '30', 10)
+      });
+      msg.style.color = 'var(--accent)';
+      msg.textContent = res.user.name + ' (' + res.user.email + ') is now ' + res.user.status.toUpperCase() + ' until ' + new Date(res.user.planEnds).toLocaleDateString() + '.';
+      loadOverview();
+      loadUsers();
+      document.getElementById('gEmail').value = '';
+    } catch (ex) {
+      msg.style.color = 'var(--danger)';
+      msg.textContent = ex.message;
+    }
+  });
+}
+
 async function loadOverview() {
   const data = await api('/api/admin/overview');
   document.getElementById('oUsers').textContent = data.users;
@@ -125,4 +148,5 @@ initApp().then((user) => {
   loadUsers();
   loadPayments();
   loadWallet();
+  grantVip();
 });

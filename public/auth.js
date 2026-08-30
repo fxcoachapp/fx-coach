@@ -12,6 +12,7 @@
   } catch (e) { /* keep empty */ }
 
   const params = new URLSearchParams(location.search);
+  const ref = params.get('ref') || '';
   if (params.get('error') === 'not_configured') {
     err.textContent = 'Google sign-in is not configured yet by the owner.';
     err.classList.add('show');
@@ -46,7 +47,7 @@
     btn.disabled = true;
     btn.textContent = form.getAttribute('data-busy') || 'Please wait…';
     const body = isSignup
-      ? { name: document.getElementById('name').value, email: document.getElementById('email').value, password: document.getElementById('password').value, remember: rememberEl ? rememberEl.checked : true }
+      ? { name: document.getElementById('name').value, email: document.getElementById('email').value, password: document.getElementById('password').value, remember: rememberEl ? rememberEl.checked : true, ref }
       : { email: document.getElementById('email').value, password: document.getElementById('password').value, remember: rememberEl ? rememberEl.checked : true };
     try {
       const res = await fetch(isSignup ? '/api/auth/signup' : '/api/auth/login', {

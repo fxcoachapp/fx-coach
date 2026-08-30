@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="robots" content="noindex" />
+  <title>Invite friends — FX Coach</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/styles.css" />
+</head>
+<body data-page="refer">
+  <div id="nav"></div>
+
+  <div class="app-main" style="max-width:760px">
+
+    <h1 class="page-title">Invite friends. Get free Pro.</h1>
+    <p class="page-sub" id="subLine">Loading…</p>
+
+    <div class="card" style="margin-bottom:22px">
+      <div style="margin-bottom:10px">Share this link — when <b id="thresholdTxt"></b> of your friends sign up <b>and subscribe</b>, you get <b id="bonusTxt"></b> of Premium.</div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
+        <input id="link" readonly value="" style="flex:1;min-width:220px;padding:12px 14px;border-radius:10px;border:1px solid var(--border);background:#0d1022;color:#e8edff;font-size:13.5px;font-family:inherit" />
+        <button class="btn btn-primary" id="copyBtn">Copy</button>
+      </div>
+      <p class="small mt" id="copied" style="color:var(--accent)"></p>
+    </div>
+
+    <div class="card" style="margin-bottom:22px">
+      <h3 style="margin-bottom:6px">Your progress</h3>
+      <div class="price" style="margin:8px 0"><span id="countTxt">0</span><small> / 5 confirmed</small></div>
+      <div style="height:12px;border-radius:8px;background:#151833;overflow:hidden">
+        <div id="bar" style="height:100%;width:0;background:linear-gradient(90deg,var(--violet),var(--accent));transition:width .3s"></div>
+      </div>
+      <p class="small mt muted">A friend counts when their payment is confirmed. Confirmed: <b id="confirmedTxt">0</b></p>
+    </div>
+
+    <h2 style="font-size:17px;margin:22px 0 12px">People you invited</h2>
+    <div class="card" id="listBox">
+      <p class="empty">Loading…</p>
+    </div>
+
+  </div>
+
+  <script src="/app/app.js"></script>
+  <script src="/app/refer.js"></script>
+</body>
+</html>

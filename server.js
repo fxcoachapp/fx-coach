@@ -10,7 +10,7 @@ const QRCode = require('qrcode');
 const bcrypt = require('bcryptjs');
 
 const { init, users, trades, payments, config, storageMode, hasUpstash } = require('./lib/db');
-const { PLAN_PRICE, PLAN_CURRENCY, TRIAL_DAYS, accessStatus, renewalDate } = require('./lib/subscription');
+const { PLAN_PRICE, PLAN_CURRENCY, TRIAL_DAYS, REFERRAL_THRESHOLD, REFERRAL_BONUS_DAYS, accessStatus, renewalDate, extendPremium } = require('./lib/subscription');
 const { getQuotes } = require('./lib/forex');
 const { reviewTrade, reviewJournal } = require('./lib/ai');
 const { PAIRS, positionSize } = require('./lib/calculator');
@@ -165,6 +165,12 @@ function isAdminEmail(email) {
   return !!process.env.ADMIN_EMAIL && String(process.env.ADMIN_EMAIL).toLowerCase() === String(email).toLowerCase();
 }
 
+function makeRefCode() {
+  let code;
+  do { code = crypto.randomBytes(4).toString('hex').toUpperCase(); } while (users.findByRefCode(code));
+  return code;
+}
+
 function applyRemember(session, remember) {
   if (remember) session.cookie.maxAge = 1000 * 60 * 60 * 24 * 30;
   else { session.cookie.maxAge = null; session.cookie.expires = null; }
@@ -187,6 +193,8 @@ function publicUser(user) {
     trialEnds: user.trialEnds,
     planEnds: user.planEnds,
     watchlist: user.watchlist || [],
+    refCode: user.refCode,
+    confirmedRefs: user.confirmedRefs || 0,
     createdAt: user.createdAt
   };
 }
@@ -266,6 +274,9 @@ app.post('/api/auth/signup', async (req, res) => {
     trialEnds: new Date(Date.now() + TRIAL_DAYS * 24 * 60 * 60 * 1000).toISOString(),
     planEnds: null,
     watchlist: ['EURUSD', 'GBPUSD', 'USDJPY'],
+    refCode: makeRefCode(),
+    refBy: req.body && req.body.ref ? (users.findByRefCode(String(req.body.ref).trim()) ? String(req.body.ref).trim() : null) : null,
+    confirmedRefs: 0,
     createdAt: new Date().toISOString()
   };
   await users.save(user);
@@ -295,11 +306,31 @@ app.post('/api/auth/logout', (req, res) => {
   req.session.destroy(() => res.json({ ok: true }));
 });
 
-app.get('/api/auth/me', apiUser, (req, res) => {
+app.get('/api/auth/me', apiUser, async (req, res) => {
+  const user = users.findById(req.user.id);
+  if (user && !user.refCode) { user.refCode = makeRefCode(); await users.save(user); }
   res.json({
-    user: publicUser(req.user),
+    user: publicUser(user),
     plan: { price: PLAN_PRICE, currency: PLAN_CURRENCY, trialDays: TRIAL_DAYS },
     walletConfigured: Object.values(paymentsLib.walletConfig()).some(Boolean)
+  });
+});
+
+app.get('/api/referrals', apiUser, async (req, res) => {
+  const me = users.findById(req.user.id);
+  if (!me) return res.status(401).json({ error: 'Not logged in.' });
+  if (!me.refCode) { me.refCode = makeRefCode(); await users.save(me); }
+  const invited = users.all()
+    .filter((u) => u.refBy && String(u.refBy).toLowerCase() === String(me.refCode).toLowerCase())
+    .map((u) => ({ email: u.email, name: u.name, status: accessStatus(u), paid: u.plan === 'active', createdAt: u.createdAt }))
+    .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+  res.json({
+    code: me.refCode,
+    link: req.protocol + '://' + req.get('host') + '/signup.html?ref=' + me.refCode,
+    confirmed: me.confirmedRefs || 0,
+    threshold: REFERRAL_THRESHOLD,
+    bonusDays: REFERRAL_BONUS_DAYS,
+    invited
   });
 });
 
@@ -489,6 +520,19 @@ app.get('/api/admin/overview', apiUser, requireAdmin, (req, res) => {
     storage: storageMode,
     upstash: hasUpstash
   });
+});
+
+app.post('/api/admin/grant-vip', apiUser, requireAdmin, async (req, res) => {
+  const { email, days } = req.body || {};
+  if (!email || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(String(email))) {
+    return res.status(400).json({ error: 'Enter a valid email.' });
+  }
+  const user = users.findByEmail(email);
+  if (!user) return res.status(404).json({ error: 'No account with that email.' });
+  const d = Math.min(parseInt(days, 10) || 30, 3650);
+  extendPremium(user, d);
+  await users.save(user);
+  res.json({ ok: true, user: { email: user.email, name: user.name, plan: user.plan, planEnds: user.planEnds, status: accessStatus(user) } });
 });
 
 app.get('/api/journal', apiUser, apiAccess, (req, res) => {
