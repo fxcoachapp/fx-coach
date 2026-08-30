@@ -49,12 +49,13 @@ function successState(p) {
   document.getElementById('expiredNote').classList.add('hidden');
   const panel = document.getElementById('panel');
   panel.innerHTML = `
-    <div class="text-center">
-      <div style="font-size:48px">✓</div>
+    <div class="text-center anim-up" style="animation-delay:0.1s">
+      <div style="font-size:52px">✓</div>
       <div class="pay-amount" style="justify-content:center;color:var(--accent)">${p.amount} USDT</div>
       <p class="small">Paid on ${p.network} · TX ${escapeHtml((p.confirmedTx || '').slice(0, 20))}…</p>
-      <a class="btn btn-primary mt" href="/app/guide.html">Open my VIP welcome</a>
+      <a class="btn btn-primary mt" href="/app/guide.html">Open my VIP welcome 🎉</a>
     </div>`;
+  celebrate();
   if (timer) clearInterval(timer);
   if (window.__countdown) clearInterval(window.__countdown);
 }

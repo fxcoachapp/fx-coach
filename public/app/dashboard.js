@@ -37,6 +37,44 @@ async function loadStats() {
   } catch (e) { /* api() handles redirects */ }
 }
 
+async function loadPulse() {
+  try {
+    const data = await api('/api/market');
+    const pulse = document.getElementById('pulse');
+
+    const hot = data.bestNow.map((b) => `
+      <div class="quote-card" style="display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:10px">
+        <div>
+          <div class="sym"><span>${escapeHtml(b.symbol)}</span></div>
+          <div class="tag">${escapeHtml(b.name)}</div>
+        </div>
+        <div style="text-align:right">
+          <div class="price">${fmtNum(b.price)}</div>
+          <div class="chg ${b.score >= 45 ? 'up' : 'down'}">${b.direction === 'up' ? '▲' : '▼'} ${b.score}/100 ${b.score >= 55 ? '· high' : b.score >= 30 ? '· medium' : '· calm'}</div>
+        </div>
+      </div>`).join('');
+
+    const win = data.windows.map((w) => `
+      <div style="display:flex;justify-content:space-between;align-items:baseline;gap:12px;padding:11px 0;border-bottom:1px dashed var(--border-soft)">
+        <div>
+          <b>${escapeHtml(w.name)}</b> <span class="tag">${w.active ? '<span style="color:var(--accent);font-weight:700">● LIVE</span>' : 'opens in ' + escapeHtml(w.opensIn)}</span>
+          <div class="small" style="margin-top:3px">${escapeHtml(w.pairs.join(' · '))}${w.active && w.closesIn ? ' · closes in ' + escapeHtml(w.closesIn) : ''}</div>
+        </div>
+      </div>`).join('');
+
+    pulse.innerHTML = `
+      <div>
+        <h3 style="font-size:15px;margin-bottom:12px">Hottest markets right now</h3>
+        ${hot}
+      </div>
+      <div>
+        <h3 style="font-size:15px;margin-bottom:12px">Best time windows (UTC)</h3>
+        ${win}
+        <p class="small" style="margin-top:10px">${escapeHtml(data.windows.find((w) => w.active && w.note)?.note || 'Set your trade inside the LIVE window for the strongest moves.')}</p>
+      </div>`;
+  } catch (e) { /* ignore */ }
+}
+
 initApp().then((user) => {
   if (!user) return;
   if (user.status === 'expired') {
@@ -49,5 +87,7 @@ initApp().then((user) => {
     : 'Pro plan active until ' + new Date(user.planEnds).toLocaleDateString() + '.';
   loadQuotes();
   loadStats();
+  loadPulse();
   setInterval(loadQuotes, 30000);
+  setInterval(loadPulse, 30000);
 });

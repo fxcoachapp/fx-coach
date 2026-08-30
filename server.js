@@ -12,6 +12,7 @@ const bcrypt = require('bcryptjs');
 const { init, users, trades, payments, config, storageMode, hasUpstash } = require('./lib/db');
 const { PLAN_PRICE, PLAN_CURRENCY, TRIAL_DAYS, REFERRAL_THRESHOLD, REFERRAL_BONUS_DAYS, accessStatus, renewalDate, extendPremium } = require('./lib/subscription');
 const { getQuotes } = require('./lib/forex');
+const marketLib = require('./lib/market');
 const { reviewTrade, reviewJournal } = require('./lib/ai');
 const { PAIRS, positionSize } = require('./lib/calculator');
 const paymentsLib = require('./lib/payments');
@@ -381,6 +382,11 @@ app.get('/api/auth/google/callback', async (req, res) => {
 
 app.get('/api/quotes', apiUser, apiAccess, async (req, res) => {
   res.json(await getQuotes());
+});
+
+app.get('/api/market', apiUser, apiAccess, async (req, res) => {
+  const quotesData = await getQuotes();
+  res.json(marketLib.analyze(quotesData.quotes));
 });
 
 app.get('/api/payments/networks', apiUser, (req, res) => {
