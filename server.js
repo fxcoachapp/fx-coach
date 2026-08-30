@@ -214,7 +214,7 @@ app.get('/api/auth/google/callback', async (req, res) => {
   try {
     const redirectUri = req.protocol + '://' + req.get('host') + '/api/auth/google/callback';
     const tokens = await oauth.exchangeCode(code, redirectUri);
-    const profile = await oauth.fetchProfile(tokens.access_token);
+    const profile = await oauth.fetchProfile(tokens);
     const user = await oauth.upsertGoogleUser(profile);
     req.session.userId = user.id;
     res.redirect('/app/dashboard.html');
