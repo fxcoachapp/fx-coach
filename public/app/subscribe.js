@@ -6,14 +6,24 @@ function netInitial() {
   };
 }
 
-async function loadNetworks(user) {
+function showNetRetry(msg) {
+  const el = document.getElementById('networks');
+  el.innerHTML = `<p class="empty">${msg ? escapeHtml(msg) + '<br>' : ''}Payment networks couldn't load. <button class="btn btn-sm mt" id="netRetry" type="button">Retry</button></p>`;
+  const b = document.getElementById('netRetry');
+  if (b) b.addEventListener('click', () => {
+    el.innerHTML = '<p class="empty">Loading payment networks…</p>';
+    loadNetworks().catch((e) => showNetRetry(e.message));
+  });
+}
+
+async function loadNetworks() {
   const data = await api('/api/payments/networks');
   const el = document.getElementById('networks');
   const netInitials = netInitial();
   const configured = data.networks.filter((n) => n.configured);
   if (!configured.length) {
-    el.innerHTML = '<p class="empty">The owner hasn\'t configured a receiving wallet yet. Please come back shortly.</p>';
     document.getElementById('netHint').textContent = '';
+    showNetRetry('The owner has not configured a receiving wallet yet — please come back shortly.');
     return;
   }
   el.innerHTML = '';
@@ -51,11 +61,9 @@ initApp().then((user) => {
     : user.status === 'trial' ? 'Free trial until ' + new Date(user.trialEnds).toLocaleDateString() + '. Subscribe below to keep access after the trial.'
     : 'Expired. Access is currently LOCKED — pay below to unlock instantly.';
   document.getElementById('wall').classList.toggle('hidden', user.status !== 'expired');
-  loadNetworks(user).catch((e) => {
-    err.textContent = e.message;
-    err.classList.add('show');
-  });
 });
+
+loadNetworks().catch((e) => showNetRetry(e.message));
 
 document.getElementById('simulateBtn').addEventListener('click', async () => {
   const btn = document.getElementById('simulateBtn');
