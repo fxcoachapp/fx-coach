@@ -67,6 +67,7 @@ function renderNav(user) {
     ['refer', 'Invite', '/app/refer.html'],
     ['subscribe', 'Plan', '/app/subscribe.html']
   ];
+  if (user.status === 'active' || user.admin) links.splice(1, 0, ['guide', 'Guide', '/app/guide.html']);
   if (user.admin) links.push(['admin', 'Admin', '/app/admin.html']);
   const html = `
     <div class="app-nav">

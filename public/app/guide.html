@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="robots" content="noindex" />
+  <title>VIP Welcome — FX Coach Pro</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/styles.css" />
+  <style>
+    .vip-hero {
+      position: relative;
+      border-radius: 22px;
+      padding: 48px 34px;
+      margin-bottom: 28px;
+      overflow: hidden;
+      color: #fff;
+      background:
+        radial-gradient(1000px 400px at 85% -10%, rgba(139, 92, 246, 0.55), transparent 60%),
+        radial-gradient(800px 380px at 10% 120%, rgba(34, 197, 94, 0.4), transparent 55%),
+        linear-gradient(135deg, #191d3a, #101428);
+      border: 1px solid rgba(139, 92, 246, 0.35);
+      box-shadow: 0 24px 70px -24px rgba(139, 92, 246, 0.45);
+    }
+    .vip-hero::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background-image: radial-gradient(rgba(255, 255, 255, 0.11) 1px, transparent 1px);
+      background-size: 22px 22px;
+      pointer-events: none;
+      mask-image: linear-gradient(180deg, rgba(0,0,0,0.5), transparent);
+    }
+    .vip-hero .badge-xl { font-size: 12px; letter-spacing: 2px; font-weight: 700; }
+    .vip-hero h1 { font-size: clamp(28px, 4vw, 44px); font-weight: 800; margin: 14px 0 10px; letter-spacing: -0.5px; }
+    .vip-hero p { color: #b9c3e6; max-width: 560px; line-height: 1.6; }
+    .vip-benefits { display: flex; gap: 22px; flex-wrap: wrap; margin-top: 26px; }
+    .vip-benefits .b { display: flex; align-items: center; gap: 8px; font-size: 13.5px; color: #dfe6ff; }
+    .vip-benefits .dot { width: 9px; height: 9px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 12px rgba(34, 197, 94, 0.9); }
+    .tut-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 16px; margin: 16px 0 34px; }
+    .tut-card {
+      background: linear-gradient(160deg, #171b38, #121530);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 24px;
+      position: relative;
+      transition: transform .15s, border-color .15s;
+    }
+    .tut-card:hover { transform: translateY(-3px); border-color: rgba(139, 92, 246, 0.5); }
+    .tut-num {
+      width: 38px; height: 38px; border-radius: 12px;
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 800; font-size: 15px; color: #fff;
+      background: linear-gradient(135deg, var(--violet), #6d28d9);
+      margin-bottom: 14px; box-shadow: 0 8px 20px -8px rgba(139, 92, 246, 0.8);
+    }
+    .tut-card h3 { font-size: 16px; margin-bottom: 8px; }
+    .tut-card p { color: var(--muted); font-size: 13.5px; line-height: 1.55; }
+    .tut-card .where { display: inline-block; margin-top: 12px; font-size: 12.5px; color: var(--accent); font-weight: 600; text-decoration: none; }
+    .checks { list-style: none; margin-top: 18px; }
+    .checks li { padding: 12px 0; border-top: 1px dashed var(--border-soft); display: flex; align-items: center; gap: 12px; color: #dbe2ff; font-size: 14px; }
+    .checks .cn { min-width: 30px; height: 30px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 13px; background: rgba(34, 197, 94, 0.15); color: var(--accent); }
+  </style>
+</head>
+<body data-page="guide">
+  <div id="nav"></div>
+
+  <div class="app-main" style="max-width:860px">
+    <div id="wall" class="hidden">
+      <div class="banner wall" style="border-radius:14px;margin-bottom:22px"><b>This page is for Pro members.</b> Subscribe below to unlock the full guide.</div>
+    </div>
+
+    <div id="vipWrap" class="hidden">
+      <section class="vip-hero">
+        <span class="badge badge-active badge-xl">✦ FX COACH PRO MEMBER</span>
+        <h1>Welcome to Pro, <span id="nameTxt">trader</span></h1>
+        <p>You've unlocked the full FX Coach workspace. Here's everything you can do — and exactly how to use it. Bookmark this page to come back anytime.</p>
+        <div class="vip-benefits">
+          <span class="b"><span class="dot"></span>Active until <b id="untilTxt">—</b></span>
+          <span class="b"><span class="dot"></span>All tools unlocked</span>
+          <span class="b"><span class="dot"></span>AI coach reviews</span>
+          <span class="b"><span class="dot"></span>Invite rewards</span>
+        </div>
+      </section>
+
+      <div class="err" id="err" style="margin-bottom:16px"></div>
+
+      <h2 style="font-size:20px;font-weight:800">Your Pro toolkit</h2>
+      <div class="tut-grid">
+        <div class="tut-card">
+          <div class="tut-num">1</div>
+          <h3>Dashboard</h3>
+          <p>Live FX quotes on dozens of pairs, your watchlist, and a daily AI market read generated from your journal activity.</p>
+          <a class="where" href="/app/dashboard.html">Open Dashboard →</a>
+        </div>
+        <div class="tut-card">
+          <div class="tut-num">2</div>
+          <h3>Journal</h3>
+          <p>Log every trade with entry, exit, stop-loss and notes. The AI reviews your trades, scores your habits, and tells you what to fix.</p>
+          <a class="where" href="/app/journal.html">Open Journal →</a>
+        </div>
+        <div class="tut-card">
+          <div class="tut-num">3</div>
+          <h3>Calculator</h3>
+          <p>Pick a pair, your account size and risk % — get the exact lot size and pip value so you never over-risk a trade.</p>
+          <a class="where" href="/app/calculator.html">Open Calculator →</a>
+        </div>
+        <div class="tut-card">
+          <div class="tut-num">4</div>
+          <h3>Invite &amp; earn</h3>
+          <p>Every 5 friends who sign up <b>and subscribe</b> = 15 free days of Pro for you. Track your invites in real time.</p>
+          <a class="where" href="/app/refer.html">Open Invite →</a>
+        </div>
+        <div class="tut-card">
+          <div class="tut-num">5</div>
+          <h3>Your plan</h3>
+          <p>See your status and days left, renew with USDT, or view how the automatic access lock works when a subscription ends.</p>
+          <a class="where" href="/app/subscribe.html">Open Plan →</a>
+        </div>
+        <div class="tut-card">
+          <div class="tut-num">6</div>
+          <h3>Daily habit</h3>
+          <p>Use the AI coach's review every evening. Ten minutes of journaling daily is how traders build the discipline the coach tracks.</p>
+          <a class="where" href="/app/dashboard.html">View AI Coach →</a>
+        </div>
+      </div>
+
+      <h2 style="font-size:20px;font-weight:800">Getting started — 3 steps</h2>
+      <ul class="checks">
+        <li><span class="cn">1</span>Log a real (or demo) trade in the <b>Journal</b> — entry, exit, and a stop-loss.</li>
+        <li><span class="cn">2</span>Open the <b>Dashboard</b> and read the daily AI review of your trading habits.</li>
+        <li><span class="cn">3</span>Share your <b>Invite link</b> so 5 friends subscribing earns you 15 extra free days.</li>
+      </ul>
+      <div class="card" style="margin-top:22px;display:flex;gap:12px;flex-wrap:wrap;align-items:center;justify-content:space-between">
+        <div>
+          <b>Ready to trade?</b>
+          <div class="small">Jump straight into your workspace.</div>
+        </div>
+        <a class="btn btn-primary" href="/app/dashboard.html">Start trading</a>
+      </div>
+    </div>
+  </div>
+
+  <script src="/app/app.js"></script>
+  <script src="/app/guide.js"></script>
+</body>
+</html>

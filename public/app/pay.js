@@ -53,7 +53,7 @@ function successState(p) {
       <div style="font-size:48px">✓</div>
       <div class="pay-amount" style="justify-content:center;color:var(--accent)">${p.amount} USDT</div>
       <p class="small">Paid on ${p.network} · TX ${escapeHtml((p.confirmedTx || '').slice(0, 20))}…</p>
-      <a class="btn btn-primary mt" href="/app/dashboard.html">Go to dashboard</a>
+      <a class="btn btn-primary mt" href="/app/guide.html">Open my VIP welcome</a>
     </div>`;
   if (timer) clearInterval(timer);
   if (window.__countdown) clearInterval(window.__countdown);
