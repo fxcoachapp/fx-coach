@@ -73,7 +73,7 @@ class UpstashSessionStore extends session.Store {
   get(sid, cb) {
     if (this.missing) return cb(null, this.mem.get(sid) || null);
     timedCall(this.redis.get(this.prefix + sid), 8000, 'upstash session get').then((raw) => {
-      const sess = raw ? JSON.parse(raw) : null;
+      const sess = (typeof raw === 'string' ? JSON.parse(raw) : raw) || null;
       if (sess) {
         const exp = sess.cookie && sess.cookie.expires ? new Date(sess.cookie.expires).getTime() : 0;
         if (exp > 0 && exp <= Date.now()) {
