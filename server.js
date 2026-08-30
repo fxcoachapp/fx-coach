@@ -647,6 +647,11 @@ app.post('/api/subscribe/simulate-nonpayment', apiUser, async (req, res) => {
 app.use((req, res) => res.status(404).json({ error: 'Not found' }));
 
 init().then(() => {
+  const w = paymentsLib.walletConfig();
+  const nets = Object.keys(paymentsLib.NETWORKS)
+    .map((n) => n + '=' + (paymentsLib.addressFor(n) ? 'set' : 'not-set'))
+    .join(' ');
+  console.log('[wallet] ' + (nets || 'no networks') + (hasUpstash && storageMode === 'upstash' ? ' (upstash)' : ''));
   if (hasUpstash && storageMode === 'upstash') {
     setInterval(() => paymentsLib.checkAllPending(), 60 * 1000);
   }
