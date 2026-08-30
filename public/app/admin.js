@@ -37,10 +37,18 @@ async function loadUsers() {
           <td class="small">${u.invites} invited · <b>${u.confirmedRefs}</b> paid</td>
           <td>${u.paidTotal ? u.paidTotal.toFixed(0) + ' USDT' : '<span class="muted">—</span>'}</td>
           <td class="small">${new Date(u.createdAt).toLocaleDateString()}</td>
-          <td>${u.status === 'active' ? `<button class="btn btn-sm revoke-btn" data-email="${escapeHtml(u.email)}">Revoke</button>` : ''}</td>
+          <td>${u.status === 'active' ? `<button class="btn btn-sm revoke-btn" data-email="${escapeHtml(u.email)}">Revoke</button>` : ''}<button class="btn btn-sm btn-ghost setpw-btn" data-id="${u.id}" title="Set / reset password">🔑</button></td>
         </tr>`).join('')}
     </table></div>`;
   el.querySelectorAll('.revoke-btn').forEach((btn) => btn.addEventListener('click', revokeVip));
+  el.querySelectorAll('.setpw-btn').forEach((btn) => btn.addEventListener('click', async () => {
+    const pw = prompt('New password for ' + document.querySelector('.setpw-btn[data-id="' + btn.dataset.id + '"]').closest('tr').cells[0].innerText + ' (min 6 chars):');
+    if (!pw) return;
+    try {
+      await api('/api/admin/users/' + btn.dataset.id + '/password', 'POST', { password: pw });
+      alert('Password set. Log in on the device with this email + new password.');
+    } catch (ex) { alert(ex.message); }
+  }));
 }
 
 async function revokeVip(e) {

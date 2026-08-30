@@ -429,6 +429,17 @@ app.post('/api/payments/:id/cancel', apiUser, async (req, res) => {
   res.json({ ok: true, payment: p });
 });
 
+app.post('/api/admin/users/:id/password', apiUser, requireAdmin, async (req, res) => {
+  const pw = String((req.body || {}).password || '');
+  if (pw.length < 6 || pw.length > 200) return res.status(400).json({ error: 'Password must be 6+ characters.' });
+  const u = users.findById(req.params.id);
+  if (!u) return res.status(404).json({ error: 'User not found.' });
+  u.passwordHash = await bcrypt.hash(pw, 10);
+  u.provider = 'email';
+  await users.save(u);
+  res.json({ ok: true });
+});
+
 app.get('/api/admin/payments', apiUser, requireAdmin, (req, res) => {
   const list = payments.all().sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)).map((p) => {
     const u = users.findById(p.userId);
