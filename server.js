@@ -248,10 +248,23 @@ app.get('/api/auth/me', apiUser, (req, res) => {
   });
 });
 
+function oauthStateFor(remember) {
+  const rnd = crypto.randomBytes(12).toString('hex');
+  const sig = crypto.createHmac('sha256', process.env.SESSION_SECRET || 'dev-secret-change-me').update(rnd).digest('hex').slice(0, 24);
+  return rnd + ':' + sig + ':' + (remember ? 'R' : 'T');
+}
+
+function verifyOAuthState(state) {
+  const parts = String(state || '').split(':');
+  if (parts.length !== 3) return null;
+  const [rnd, sig, tag] = parts;
+  const expect = crypto.createHmac('sha256', process.env.SESSION_SECRET || 'dev-secret-change-me').update(rnd).digest('hex').slice(0, 24);
+  if (sig !== expect) return null;
+  return tag === 'R';
+}
+
 app.get('/api/auth/google', (req, res) => {
-  const state = oauth.randomState() + ':' + (req.query.remember === '1' ? 'R' : 'T');
-  req.session.oauthState = state;
-  req.session.remember = req.query.remember === '1';
+  const state = oauthStateFor(req.query.remember === '1');
   const redirectUri = req.protocol + '://' + req.get('host') + '/api/auth/google/callback';
   const url = oauth.authUrl(state, redirectUri);
   if (!url) return res.redirect('/login.html?error=not_configured');
@@ -261,15 +274,15 @@ app.get('/api/auth/google', (req, res) => {
 app.get('/api/auth/google/callback', async (req, res) => {
   const { code, state, error } = req.query;
   if (error) return res.redirect('/login.html?error=google_denied');
-  if (!state || state !== req.session.oauthState) return res.redirect('/login.html?error=bad_state');
-  const remember = state.endsWith(':R');
+  const remember = verifyOAuthState(state);
+  if (remember === null) return res.redirect('/login.html?error=bad_state');
   try {
     const redirectUri = req.protocol + '://' + req.get('host') + '/api/auth/google/callback';
     const tokens = await oauth.exchangeCode(code, redirectUri);
     const profile = await oauth.fetchProfile(tokens);
     const user = await oauth.upsertGoogleUser(profile);
     req.session.userId = user.id;
-    applyRemember(req.session, remember || !!req.session.remember);
+    applyRemember(req.session, remember);
     res.redirect('/app/dashboard.html');
   } catch (e) {
     console.error('GOOGLE OAUTH ERROR:', e.message);
