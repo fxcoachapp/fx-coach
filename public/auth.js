@@ -24,6 +24,21 @@
     err.classList.add('show');
   }
 
+  const rememberEl = document.getElementById('remember');
+  if (rememberEl) {
+    const googleLink = document.querySelector('a.btn-google');
+    const syncRememberUrl = () => {
+      if (googleLink) {
+        const url = new URL(googleLink.getAttribute('href'), location.origin);
+        if (rememberEl.checked) url.searchParams.set('remember', '1');
+        else url.searchParams.delete('remember');
+        googleLink.setAttribute('href', url.pathname + url.search);
+      }
+    };
+    rememberEl.addEventListener('change', syncRememberUrl);
+    syncRememberUrl();
+  }
+
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
     err.classList.remove('show');
@@ -31,8 +46,8 @@
     btn.disabled = true;
     btn.textContent = form.getAttribute('data-busy') || 'Please wait…';
     const body = isSignup
-      ? { name: document.getElementById('name').value, email: document.getElementById('email').value, password: document.getElementById('password').value }
-      : { email: document.getElementById('email').value, password: document.getElementById('password').value };
+      ? { name: document.getElementById('name').value, email: document.getElementById('email').value, password: document.getElementById('password').value, remember: rememberEl ? rememberEl.checked : true }
+      : { email: document.getElementById('email').value, password: document.getElementById('password').value, remember: rememberEl ? rememberEl.checked : true };
     try {
       const res = await fetch(isSignup ? '/api/auth/signup' : '/api/auth/login', {
         method: 'POST',

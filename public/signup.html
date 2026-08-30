@@ -37,6 +37,10 @@
           <label for="password">Password</label>
           <input id="password" type="password" required minlength="6" placeholder="At least 6 characters" />
         </div>
+        <label class="remember-row" style="display:flex;align-items:center;gap:8px;font-size:13px;color:var(--muted);margin:2px 0 14px;cursor:pointer">
+          <input type="checkbox" id="remember" checked style="accent-color:var(--violet);width:15px;height:15px" />
+          <span>Remember me on this device</span>
+        </label>
         <button class="btn btn-primary btn-block" id="submit" type="submit">Create account</button>
       </form>
       <p class="small mt" style="text-align:center">Already have an account? <a href="/login.html">Log in</a></p>

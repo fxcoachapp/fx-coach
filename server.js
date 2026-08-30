@@ -73,6 +73,11 @@ function isAdminEmail(email) {
   return !!process.env.ADMIN_EMAIL && String(process.env.ADMIN_EMAIL).toLowerCase() === String(email).toLowerCase();
 }
 
+function applyRemember(session, remember) {
+  if (remember) session.cookie.maxAge = 1000 * 60 * 60 * 24 * 30;
+  else { session.cookie.maxAge = null; session.cookie.expires = null; }
+}
+
 function currentUser(req) {
   if (!req.session.userId) return null;
   return users.findById(req.session.userId);
@@ -173,6 +178,7 @@ app.post('/api/auth/signup', async (req, res) => {
   };
   await users.save(user);
   req.session.userId = user.id;
+  applyRemember(req.session, !!req.body.remember);
   res.json({ ok: true, user: publicUser(user) });
 });
 
@@ -183,6 +189,7 @@ app.post('/api/auth/login', async (req, res) => {
     return res.status(401).json({ error: 'Invalid email or password.' });
   }
   req.session.userId = user.id;
+  applyRemember(req.session, !!req.body.remember);
   res.json({ ok: true, user: publicUser(user) });
 });
 
@@ -201,6 +208,7 @@ app.get('/api/auth/me', apiUser, (req, res) => {
 app.get('/api/auth/google', (req, res) => {
   const state = oauth.randomState();
   req.session.oauthState = state;
+  req.session.remember = req.query.remember === '1';
   const redirectUri = req.protocol + '://' + req.get('host') + '/api/auth/google/callback';
   const url = oauth.authUrl(state, redirectUri);
   if (!url) return res.redirect('/login.html?error=not_configured');
@@ -217,6 +225,7 @@ app.get('/api/auth/google/callback', async (req, res) => {
     const profile = await oauth.fetchProfile(tokens);
     const user = await oauth.upsertGoogleUser(profile);
     req.session.userId = user.id;
+    applyRemember(req.session, !!req.session.remember);
     res.redirect('/app/dashboard.html');
   } catch (e) {
     console.error('GOOGLE OAUTH ERROR:', e.message);
