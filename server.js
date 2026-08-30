@@ -92,11 +92,11 @@ class UpstashSessionStore extends session.Store {
   }
   set(sid, sess, cb) {
     this.mem.set(sid, sess);
-    const body = new URLSearchParams({ key: this.prefix + sid, value: JSON.stringify(sess) });
+    const body = JSON.stringify({ key: this.prefix + sid, value: JSON.stringify(sess), px: this._ttl(sess) });
     fetch(this.url + '/set', {
       method: 'POST',
-      headers: Object.assign(this._auth(), { 'Content-Type': 'application/x-www-form-urlencoded' }),
-      body: body.toString(),
+      headers: Object.assign(this._auth(), { 'Content-Type': 'application/json' }),
+      body,
       signal: AbortSignal.timeout(8000)
     }).then((r) => { if (!r.ok) throw new Error('upstash set ' + r.status); cb && cb(); })
       .catch((e) => { this._warn(); cb && cb(); });
@@ -113,11 +113,10 @@ class UpstashSessionStore extends session.Store {
 async function probeUpstash() {
   const probeKey = 'fx:probe';
   try {
-    const setBody = new URLSearchParams({ key: probeKey, value: 'ok' });
     const setRes = await fetch(process.env.UPSTASH_REDIS_REST_URL + '/set', {
       method: 'POST',
-      headers: { Authorization: 'Bearer ' + process.env.UPSTASH_REDIS_REST_TOKEN, 'Content-Type': 'application/x-www-form-urlencoded' },
-      body: setBody.toString(),
+      headers: { Authorization: 'Bearer ' + process.env.UPSTASH_REDIS_REST_TOKEN, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ key: probeKey, value: 'ok' }),
       signal: AbortSignal.timeout(8000)
     });
     if (!setRes.ok) return 'HTTP ' + setRes.status;
@@ -498,6 +497,24 @@ app.post('/api/admin/wallet/binance-fetch', apiUser, requireAdmin, async (req, r
   } catch (e) {
     res.status(400).json({ error: e.message });
   }
+});
+
+app.post('/api/admin/wallet/binance-fetch-all', apiUser, requireAdmin, async (req, res) => {
+  const wallet = paymentsLib.walletConfig();
+  const results = [];
+  for (const network of ['TRC20', 'BEP20', 'ERC20']) {
+    try {
+      const data = await fetchDepositAddress('USDT', network);
+      const key = network === 'BEP20' && !data.address ? data : null;
+      const address = (key && key.address) || data.address || '';
+      if (address) { wallet[network] = address; results.push({ network, ok: true, address }); }
+      else results.push({ network, ok: false, error: 'Binance returned no address for this network.' });
+    } catch (e) {
+      results.push({ network, ok: false, error: e.message });
+    }
+  }
+  await config.set('wallet', wallet);
+  res.json({ ok: true, results, wallet: paymentsLib.walletConfig() });
 });
 
 app.get('/api/admin/users', apiUser, requireAdmin, (req, res) => {

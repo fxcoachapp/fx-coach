@@ -168,6 +168,28 @@ document.querySelectorAll('[data-fetch]').forEach((b) => b.addEventListener('cli
   b.disabled = false; b.classList.remove('spinner');
 }));
 
+document.getElementById('fetchAll').addEventListener('click', async () => {
+  const b = document.getElementById('fetchAll');
+  b.disabled = true; b.textContent = 'Contacting Binance…';
+  err.classList.remove('show');
+  try {
+    const data = await api('/api/admin/wallet/binance-fetch-all', 'POST', {});
+    const map = { TRC20: 'wTRC20', BEP20: 'wBEP20', ERC20: 'wERC20' };
+    for (const r of data.results) {
+      if (r.address) document.getElementById(map[r.network]).value = r.address;
+    }
+    const failed = data.results.filter((r) => !r.address).map((r) => r.network);
+    b.textContent = 'Done ✓' + (failed.length ? ' — ' + failed.join(', ') + ' empty' : '');
+    var s = document.getElementById('walletSaved');
+    s.textContent = failed.length ? 'Saved everything found; ' + failed.join(', ') + ' returned no address.' : 'Saved ✓ All networks set.';
+  } catch (ex) {
+    err.textContent = ex.message;
+    err.classList.add('show');
+    b.textContent = 'Auto-fetch ALL networks';
+  }
+  b.disabled = false;
+});
+
 grantVip();
 
 initApp().then((user) => {
