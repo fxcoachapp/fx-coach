@@ -92,11 +92,11 @@ class UpstashSessionStore extends session.Store {
   }
   set(sid, sess, cb) {
     this.mem.set(sid, sess);
-    const body = JSON.stringify({ key: this.prefix + sid, value: JSON.stringify(sess), px: this._ttl(sess) });
-    fetch(this.url + '/set', {
+    const val = encodeURIComponent(JSON.stringify(sess));
+    const px = this._ttl(sess);
+    fetch(this.url + '/set/' + encodeURIComponent(this.prefix + sid) + '/' + val + '/PX/' + px, {
       method: 'POST',
-      headers: Object.assign(this._auth(), { 'Content-Type': 'application/json' }),
-      body,
+      headers: this._auth(),
       signal: AbortSignal.timeout(8000)
     }).then((r) => { if (!r.ok) throw new Error('upstash set ' + r.status); cb && cb(); })
       .catch((e) => { this._warn(); cb && cb(); });
@@ -113,12 +113,10 @@ class UpstashSessionStore extends session.Store {
 async function probeUpstash() {
   const probeKey = 'fx:probe';
   try {
-    const setRes = await fetch(process.env.UPSTASH_REDIS_REST_URL + '/set', {
-      method: 'POST',
-      headers: { Authorization: 'Bearer ' + process.env.UPSTASH_REDIS_REST_TOKEN, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ key: probeKey, value: 'ok' }),
-      signal: AbortSignal.timeout(8000)
-    });
+    const setRes = await fetch(
+      process.env.UPSTASH_REDIS_REST_URL + '/set/' + probeKey + '/ok',
+      { method: 'POST', headers: { Authorization: 'Bearer ' + process.env.UPSTASH_REDIS_REST_TOKEN }, signal: AbortSignal.timeout(8000) }
+    );
     if (!setRes.ok) return 'HTTP ' + setRes.status;
     const getRes = await fetch(process.env.UPSTASH_REDIS_REST_URL + '/get/' + probeKey, {
       headers: { Authorization: 'Bearer ' + process.env.UPSTASH_REDIS_REST_TOKEN },
