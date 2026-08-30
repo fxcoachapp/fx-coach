@@ -232,6 +232,12 @@ const gateApp = (req, res, next) => {
 };
 
 app.use('/app', gateApp);
+app.use((req, res, next) => {
+  if (/\.(html?|js|css|json)$/i.test(req.path)) {
+    res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+  }
+  next();
+});
 app.use(express.static(path.join(__dirname, 'public')));
 app.get('/', (req, res) => res.sendFile(path.join(__dirname, 'public', 'index.html')));
 
