@@ -246,6 +246,7 @@ a:hover { text-decoration: none; }
 
 .mono { font-family: "SF Mono", ui-monospace, Consolas, "Courier New", monospace; }
 .tag { color: var(--muted); font-size: 13px; }
+.muted { color: var(--muted); }
 .small { font-size: 13px; color: var(--muted); }
 
 .coach { background: linear-gradient(160deg, var(--card-2), var(--card-solid)); border: 1px solid var(--border); border-radius: var(--radius); padding: 22px; }

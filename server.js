@@ -496,15 +496,38 @@ app.post('/api/admin/wallet/binance-fetch', apiUser, requireAdmin, async (req, r
 
 app.get('/api/admin/users', apiUser, requireAdmin, (req, res) => {
   res.json({
-    users: users.all().map((u) => ({
-      email: u.email,
-      name: u.name,
-      provider: u.provider || 'email',
-      plan: u.plan,
-      status: accessStatus(u),
-      createdAt: u.createdAt
-    })).sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+    users: users.all().map((u) => {
+      const paidTotal = payments.all()
+        .filter((p) => p.userId === u.id && p.status === 'paid')
+        .reduce((s, p) => s + p.amount, 0);
+      const invites = users.all()
+        .filter((x) => x.refBy && String(x.refBy).toLowerCase() === String(u.refCode || '').toLowerCase()).length;
+      return {
+        email: u.email,
+        name: u.name,
+        provider: u.provider || 'email',
+        plan: u.plan,
+        status: accessStatus(u),
+        planEnds: u.planEnds,
+        trialEnds: u.trialEnds,
+        confirmedRefs: u.confirmedRefs || 0,
+        invites,
+        paidTotal,
+        createdAt: u.createdAt
+      };
+    }).sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
   });
+});
+
+app.post('/api/admin/revoke-vip', apiUser, requireAdmin, async (req, res) => {
+  const { email } = req.body || {};
+  if (!email) return res.status(400).json({ error: 'Enter a valid email.' });
+  const user = users.findByEmail(email);
+  if (!user) return res.status(404).json({ error: 'No account with that email.' });
+  user.plan = 'expired';
+  user.planEnds = null;
+  await users.save(user);
+  res.json({ ok: true, user: { email: user.email, name: user.name, status: accessStatus(user) } });
 });
 
 app.get('/api/admin/overview', apiUser, requireAdmin, (req, res) => {

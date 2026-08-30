@@ -7,6 +7,14 @@ function statusPill(status) {
   return `<span class="status-pill badge-${cls}">${label}</span>`;
 }
 
+function daysLeft(u) {
+  const end = u.status === 'trial' ? (u.trialEnds || u.planEnds) : u.planEnds;
+  if (!end) return '';
+  const d = Math.ceil((new Date(end).getTime() - Date.now()) / 86400000);
+  if (d < 1) return '';
+  return d + 'd';
+}
+
 async function loadUsers() {
   const data = await api('/api/admin/users');
   const el = document.getElementById('usersTable');
@@ -15,17 +23,37 @@ async function loadUsers() {
   el.innerHTML = `
     <div style="overflow-x:auto">
     <table class="tbl">
-      <tr><th>Email</th><th>Name</th><th>Account</th><th>Plan</th><th>Status</th><th>Joined</th></tr>
+      <tr><th>Email</th><th>Name</th><th>Account</th><th>Status</th><th>Invites</th><th>Paid (USDT)</th><th>Joined</th><th></th></tr>
       ${data.users.map((u) => `
         <tr>
           <td>${escapeHtml(u.email)}${u.email === __me.email ? ' <span class="badge badge-active">you</span>' : ''}</td>
           <td>${escapeHtml(u.name)}</td>
           <td><span class="badge ${u.provider === 'google' ? 'badge-trial' : 'badge-be'}">${u.provider === 'google' ? 'Google' : 'Email'}</span></td>
-          <td class="small">${u.plan}</td>
-          <td>${statusPill(u.status)}</td>
+          <td>
+            ${statusBadge(u.status)}
+            ${u.status === 'active' || u.status === 'trial' ? `<span class="tag">${daysLeft(u)} left</span>` : ''}
+            <div class="small">${u.plan}</div>
+          </td>
+          <td class="small">${u.invites} invited · <b>${u.confirmedRefs}</b> paid</td>
+          <td>${u.paidTotal ? u.paidTotal.toFixed(0) + ' USDT' : '<span class="muted">—</span>'}</td>
           <td class="small">${new Date(u.createdAt).toLocaleDateString()}</td>
+          <td>${u.status === 'active' ? `<button class="btn btn-sm revoke-btn" data-email="${escapeHtml(u.email)}">Revoke</button>` : ''}</td>
         </tr>`).join('')}
     </table></div>`;
+  el.querySelectorAll('.revoke-btn').forEach((btn) => btn.addEventListener('click', revokeVip));
+}
+
+async function revokeVip(e) {
+  const email = e.target.dataset.email;
+  if (!confirm('Revoke VIP access for ' + email + '? They will lose access immediately.')) return;
+  try {
+    const res = await api('/api/admin/revoke-vip', 'POST', { email });
+    alert(res.user.name + ' (' + email + ') revoked.');
+    loadOverview();
+    loadUsers();
+  } catch (ex) {
+    alert(ex.message);
+  }
 }
 
 function grantVip() {
