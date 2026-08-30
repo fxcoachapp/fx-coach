@@ -30,15 +30,21 @@
 
     <div class="card" style="margin-bottom:22px">
       <h3 style="margin-bottom:6px">Your progress</h3>
-      <div class="price" style="margin:8px 0"><span id="countTxt">0</span><small> / 5 confirmed</small></div>
+      <div class="price" style="margin:8px 0"><span id="countTxt">0</span><small> / <span id="thresholdTxt"></span> confirmed · <span id="countTxt2">5</span> to go</small></div>
       <div style="height:12px;border-radius:8px;background:#151833;overflow:hidden">
         <div id="bar" style="height:100%;width:0;background:linear-gradient(90deg,var(--violet),var(--accent));transition:width .3s"></div>
       </div>
-      <p class="small mt muted">A friend counts when their payment is confirmed. Confirmed: <b id="confirmedTxt">0</b></p>
+      <p class="small mt muted">A friend counts when their payment is confirmed. Confirmed: <b id="confirmedTxt">0</b> · next reward: <b id="bonusTxt"></b> free</p>
+      <p class="small" style="margin-top:6px;color:var(--accent)" id="earnedTxt"></p>
     </div>
 
     <h2 style="font-size:17px;margin:22px 0 12px">People you invited</h2>
     <div class="card" id="listBox">
+      <p class="empty">Loading…</p>
+    </div>
+
+    <h2 style="font-size:17px;margin:26px 0 12px">Top inviters this month</h2>
+    <div class="card" id="leaderboard">
       <p class="empty">Loading…</p>
     </div>
 

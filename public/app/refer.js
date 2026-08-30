@@ -7,8 +7,29 @@ initApp().then(async (user) => {
   document.getElementById('thresholdTxt').textContent = data.threshold;
   document.getElementById('bonusTxt').textContent = data.bonusDays + ' days';
   document.getElementById('countTxt').textContent = Math.min(data.confirmed, data.threshold);
+  document.getElementById('countTxt2').textContent = data.nextAtPaid;
   document.getElementById('confirmedTxt').textContent = data.confirmed;
   document.getElementById('bar').style.width = Math.min(100, (data.confirmed / data.threshold) * 100) + '%';
+  document.getElementById('earnedTxt').textContent = data.earnedBonuses > 0 ? ('Bonus earned ' + (data.earnedBonuses * data.bonusDays) + ' days so far 🎉') : 'Pay confirmed invites to unlock free days.';
+
+  const board = document.getElementById('leaderboard');
+  if (!(data.leaderboard || []).length) {
+    board.innerHTML = '<p class="empty">Be the first inviter to appear here — share your link and get friends signed up.</p>';
+  } else {
+    board.innerHTML = `
+      <div style="overflow-x:auto">
+      <table class="tbl">
+        <tr><th>#</th><th>Inviter</th><th>Invites</th><th>Paid</th></tr>
+        ${data.leaderboard.map((l, i) => `
+          <tr>
+            <td>${i + 1 <= 3 ? ['🥇', '🥈', '🥉'][i] : i + 1}</td>
+            <td>${escapeHtml(l.name)}</td>
+            <td>${l.invites}</td>
+            <td>${l.paid}</td>
+          </tr>`).join('')}
+      </table></div>
+      <p class="small" style="margin-top:10px">Names are masked. Ranked by paid invites first.</p>`;
+  }
 
   const linkEl = document.getElementById('link');
   linkEl.value = data.link;

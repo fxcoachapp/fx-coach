@@ -14,7 +14,8 @@ const { init, users, trades, payments, config, storageMode, hasUpstash, read: db
 const { PLAN_PRICE, PLAN_CURRENCY, TRIAL_DAYS, REFERRAL_THRESHOLD, REFERRAL_BONUS_DAYS, accessStatus, renewalDate, extendPremium } = require('./lib/subscription');
 const { getQuotes } = require('./lib/forex');
 const marketLib = require('./lib/market');
-const { reviewTrade, reviewJournal } = require('./lib/ai');
+const { reviewTrade, reviewJournal, journalStats } = require('./lib/ai');
+const { progressFor } = require('./lib/progress');
 const { PAIRS, positionSize } = require('./lib/calculator');
 const paymentsLib = require('./lib/payments');
 const { fetchDepositAddress } = require('./lib/binance');
@@ -148,6 +149,12 @@ function makeRefCode() {
   let code;
   do { code = crypto.randomBytes(4).toString('hex').toUpperCase(); } while (users.findByRefCode(code));
   return code;
+}
+
+function maskName(name) {
+  const n = String(name || '').trim();
+  if (!n) return 'Trader';
+  return n.charAt(0) + '***';
 }
 
 function applyRemember(session, remember) {
@@ -329,12 +336,31 @@ app.get('/api/referrals', apiUser, async (req, res) => {
     .filter((u) => u.refBy && String(u.refBy).toLowerCase() === String(me.refCode).toLowerCase())
     .map((u) => ({ email: u.email, name: u.name, status: accessStatus(u), paid: u.plan === 'active', createdAt: u.createdAt }))
     .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+
+  const leaderboard = users.all()
+    .map((u) => {
+      const paid = users.all().filter((x) => x.refBy && String(x.refBy).toLowerCase() === String(u.refCode || '').toLowerCase() && x.plan === 'active').length;
+      const invites = users.all().filter((x) => x.refBy && String(x.refBy).toLowerCase() === String(u.refCode || '').toLowerCase()).length;
+      return { name: maskName(u.name), invites, paid };
+    })
+    .filter((x) => x.invites > 0)
+    .sort((a, b) => (b.paid - a.paid) || (b.invites - a.invites))
+    .slice(0, 10);
+
+  const confirmed = me.confirmedRefs || 0;
+  const cycle = Math.floor(confirmed / REFERRAL_THRESHOLD);
+  const nextAt = (cycle + 1) * REFERRAL_THRESHOLD;
+
   res.json({
     code: me.refCode,
     link: req.protocol + '://' + req.get('host') + '/signup.html?ref=' + me.refCode,
-    confirmed: me.confirmedRefs || 0,
+    confirmed,
     threshold: REFERRAL_THRESHOLD,
     bonusDays: REFERRAL_BONUS_DAYS,
+    nextAt,
+    nextAtPaid: Math.max(0, nextAt - confirmed),
+    earnedBonuses: cycle,
+    leaderboard,
     invited
   });
 });
@@ -742,6 +768,20 @@ app.post('/api/review/trade', apiUser, apiAccess, (req, res) => {
 
 app.get('/api/review/journal', apiUser, apiAccess, (req, res) => {
   res.json({ review: reviewJournal(trades.byUser(req.user.id)) });
+});
+
+app.get('/api/progress', apiUser, apiAccess, (req, res) => {
+  const list = trades.byUser(req.user.id);
+  const stats = journalStats(list);
+  const p = progressFor(req.user, list, stats);
+  const status = accessStatus(req.user);
+  const endsAt = status === 'trial' ? req.user.trialEnds : status === 'active' ? req.user.planEnds : null;
+  p.status = status;
+  p.plan = req.user.plan;
+  p.planEnds = req.user.planEnds;
+  p.trialEnds = req.user.trialEnds;
+  p.daysLeft = endsAt ? Math.max(0, Math.ceil((new Date(endsAt).getTime() - Date.now()) / 86400000)) : 0;
+  res.json(p);
 });
 
 app.post('/api/calculator', apiUser, apiAccess, (req, res) => {

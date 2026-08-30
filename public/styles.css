@@ -495,3 +495,49 @@ table.tbl tbody tr:hover { background: rgba(56, 189, 248, 0.05); }
   [data-reveal] { opacity: 1; transform: none; }
   .btn-shine::after { display: none; }
 }
+
+/* ============ Dashboard: glass, trade ideas, progress ============ */
+
+.glass {
+  background: linear-gradient(165deg, rgba(23, 34, 68, 0.55), rgba(13, 19, 40, 0.75));
+  backdrop-filter: blur(10px);
+}
+.coach.glass, .stat.glass { border-color: var(--border); }
+
+.ideas { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 14px; }
+.idea-card {
+  background: var(--card); border: 1px solid var(--border); border-radius: var(--radius);
+  padding: 16px 18px; position: relative; overflow: hidden;
+  transition: transform 0.18s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+}
+.idea-card::after {
+  content: ""; position: absolute; inset: 0; pointer-events: none;
+  background: radial-gradient(340px 130px at 85% -10%, rgba(56, 189, 248, 0.12), transparent 70%);
+}
+.idea-card:hover { transform: translateY(-4px); border-color: rgba(56, 189, 248, 0.45); box-shadow: 0 18px 44px -18px rgba(56, 189, 248, 0.28); }
+.idea-head { display: flex; align-items: center; gap: 9px; flex-wrap: wrap; margin-bottom: 6px; }
+.idea-sym { font-weight: 800; font-size: 15px; }
+.idea-dir { margin-left: auto; font-size: 12px; font-weight: 700; }
+.idea-why { color: var(--muted); font-size: 13.5px; margin: 8px 0 10px; }
+.idea-row { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+.idea-row b.live-tag { color: var(--accent); font-size: 12.5px; white-space: nowrap; }
+.live-tag { padding: 3px 9px; border-radius: 999px; font-size: 12px; font-weight: 700; background: rgba(34, 197, 94, 0.13); color: var(--accent); }
+.idea-row b:not(.live-tag) { color: var(--accent-2); font-size: 12.5px; white-space: nowrap; }
+.risk-note { margin-top: 10px; opacity: 0.85; }
+
+.progress-card { border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; }
+.streak-box { display: flex; align-items: center; gap: 16px; margin-bottom: 14px; }
+.streak-flame { font-size: 40px; filter: drop-shadow(0 0 14px rgba(240, 185, 11, 0.4)); }
+.streak-num { font-size: 30px; font-weight: 800; letter-spacing: -0.5px; }
+.streak-num small { font-size: 15px; color: var(--muted); font-weight: 600; }
+.bar { height: 12px; border-radius: 8px; background: #151833; overflow: hidden; }
+.bar-fill { height: 100%; background: linear-gradient(90deg, var(--violet), var(--accent)); border-radius: 8px; transition: width 0.5s ease; }
+.badge-row { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
+.badge-chip {
+  width: 42px; height: 42px; border-radius: 12px; display: grid; place-items: center;
+  font-size: 19px; border: 1px solid var(--border); background: var(--card-solid); transition: transform 0.15s ease;
+}
+.badge-chip:hover { transform: translateY(-2px) scale(1.06); }
+.badge-chip.on { border-color: rgba(240, 185, 11, 0.5); box-shadow: 0 6px 18px -8px rgba(240, 185, 11, 0.45); }
+.badge-chip.off { opacity: 0.35; filter: grayscale(1); }
+#reminderBanner { background: rgba(240, 185, 11, 0.12); border-bottom: 1px solid rgba(240, 185, 11, 0.4); color: #f5ddab; }
