@@ -206,7 +206,7 @@ app.get('/api/auth/me', apiUser, (req, res) => {
 });
 
 app.get('/api/auth/google', (req, res) => {
-  const state = oauth.randomState();
+  const state = oauth.randomState() + ':' + (req.query.remember === '1' ? 'R' : 'T');
   req.session.oauthState = state;
   req.session.remember = req.query.remember === '1';
   const redirectUri = req.protocol + '://' + req.get('host') + '/api/auth/google/callback';
@@ -219,13 +219,14 @@ app.get('/api/auth/google/callback', async (req, res) => {
   const { code, state, error } = req.query;
   if (error) return res.redirect('/login.html?error=google_denied');
   if (!state || state !== req.session.oauthState) return res.redirect('/login.html?error=bad_state');
+  const remember = state.endsWith(':R');
   try {
     const redirectUri = req.protocol + '://' + req.get('host') + '/api/auth/google/callback';
     const tokens = await oauth.exchangeCode(code, redirectUri);
     const profile = await oauth.fetchProfile(tokens);
     const user = await oauth.upsertGoogleUser(profile);
     req.session.userId = user.id;
-    applyRemember(req.session, !!req.session.remember);
+    applyRemember(req.session, remember || !!req.session.remember);
     res.redirect('/app/dashboard.html');
   } catch (e) {
     console.error('GOOGLE OAUTH ERROR:', e.message);
