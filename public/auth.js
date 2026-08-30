@@ -19,7 +19,8 @@
     err.textContent = 'Google sign-in was cancelled.';
     err.classList.add('show');
   } else if (params.get('error') && params.get('error').startsWith('google')) {
-    err.textContent = 'Google sign-in failed. Please try again or use email.';
+    const detail = params.get('detail');
+    err.textContent = 'Google sign-in failed' + (detail ? ' — ' + detail : '') + '. Please try again or use email.';
     err.classList.add('show');
   }
 

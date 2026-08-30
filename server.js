@@ -219,7 +219,8 @@ app.get('/api/auth/google/callback', async (req, res) => {
     req.session.userId = user.id;
     res.redirect('/app/dashboard.html');
   } catch (e) {
-    res.redirect('/login.html?error=google_failed');
+    console.error('GOOGLE OAUTH ERROR:', e.message);
+    res.redirect('/login.html?error=google_failed&detail=' + encodeURIComponent(String(e.message || 'unknown').slice(0, 200)));
   }
 });
 
