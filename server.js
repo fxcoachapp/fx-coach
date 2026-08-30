@@ -201,7 +201,8 @@ app.get('/api/auth/me', apiUser, (req, res) => {
 app.get('/api/auth/google', (req, res) => {
   const state = oauth.randomState();
   req.session.oauthState = state;
-  const url = oauth.authUrl(state);
+  const redirectUri = req.protocol + '://' + req.get('host') + '/api/auth/google/callback';
+  const url = oauth.authUrl(state, redirectUri);
   if (!url) return res.redirect('/login.html?error=not_configured');
   res.redirect(url);
 });
@@ -211,7 +212,8 @@ app.get('/api/auth/google/callback', async (req, res) => {
   if (error) return res.redirect('/login.html?error=google_denied');
   if (!state || state !== req.session.oauthState) return res.redirect('/login.html?error=bad_state');
   try {
-    const tokens = await oauth.exchangeCode(code);
+    const redirectUri = req.protocol + '://' + req.get('host') + '/api/auth/google/callback';
+    const tokens = await oauth.exchangeCode(code, redirectUri);
     const profile = await oauth.fetchProfile(tokens.access_token);
     const user = await oauth.upsertGoogleUser(profile);
     req.session.userId = user.id;
