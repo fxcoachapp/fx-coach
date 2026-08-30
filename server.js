@@ -51,11 +51,54 @@ app.use(helmet({
 app.use(express.json({ limit: '16kb' }));
 app.use(express.urlencoded({ extended: false, limit: '16kb' }));
 
+class UpstashSessionStore extends session.Store {
+  constructor(opts) {
+    super();
+    this.url = String(opts.url).trim().replace(/\/$/, '');
+    this.token = String(opts.token).trim();
+    this.prefix = 'fx:sess:';
+  }
+  _ttl(sess) {
+    const c = sess && sess.cookie;
+    if (c && typeof c.maxAge === 'number' && c.maxAge > 0) return Math.ceil(c.maxAge / 1000);
+    if (c && c.expires) return Math.ceil((new Date(c.expires).getTime() - Date.now()) / 1000);
+    return 30 * 24 * 60 * 60;
+  }
+  _auth() { return { Authorization: 'Bearer ' + this.token }; }
+  get(sid, cb) {
+    fetch(this.url + '/get/' + this.prefix + sid, { headers: this._auth(), signal: AbortSignal.timeout(8000) })
+      .then((r) => r.json())
+      .then((j) => cb(null, j && j.result !== null && j.result !== undefined ? JSON.parse(j.result) : null))
+      .catch((e) => cb(e));
+  }
+  set(sid, sess, cb) {
+    const body = new URLSearchParams({ key: this.prefix + sid, value: JSON.stringify(sess) });
+    fetch(this.url + '/set', {
+      method: 'POST',
+      headers: Object.assign(this._auth(), { 'Content-Type': 'application/x-www-form-urlencoded', 'Cache-Control': 'max-age=' + this._ttl(sess) }),
+      body: body.toString(),
+      signal: AbortSignal.timeout(8000)
+    }).then((r) => { if (!r.ok) throw new Error('upstash set ' + r.status); cb && cb(); })
+      .catch((e) => { cb && cb(e); });
+  }
+  touch(sid, sess, cb) { this.set(sid, sess, cb); }
+  destroy(sid, cb) {
+    fetch(this.url + '/del/' + this.prefix + sid, { headers: this._auth(), signal: AbortSignal.timeout(8000) })
+      .then(() => { cb && cb(); })
+      .catch((e) => { cb && cb(e); });
+  }
+}
+
+const sessionStore = hasUpstash
+  ? new UpstashSessionStore({ url: process.env.UPSTASH_REDIS_REST_URL, token: process.env.UPSTASH_REDIS_REST_TOKEN })
+  : null;
+
 app.use(session({
   secret: process.env.SESSION_SECRET || 'dev-secret-change-me',
   resave: false,
   saveUninitialized: false,
   rolling: false,
+  store: sessionStore || undefined,
   cookie: {
     httpOnly: true,
     sameSite: 'lax',
