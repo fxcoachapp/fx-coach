@@ -10,6 +10,7 @@
     "node": ">=18"
   },
   "dependencies": {
+    "@upstash/redis": "^1.38.3",
     "bcryptjs": "^2.4.3",
     "dotenv": "^17.4.2",
     "express": "^4.19.2",

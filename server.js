@@ -53,10 +53,9 @@ app.use(express.json({ limit: '16kb' }));
 app.use(express.urlencoded({ extended: false, limit: '16kb' }));
 
 class UpstashSessionStore extends session.Store {
-  constructor(opts) {
+  constructor(redis) {
     super();
-    this.url = String(opts.url).trim().replace(/\/$/, '');
-    this.token = String(opts.token).trim();
+    this.redis = redis;
     this.prefix = 'fx:sess:';
     this.mem = new Map();
     this.missing = false;
@@ -67,70 +66,51 @@ class UpstashSessionStore extends session.Store {
     if (c && c.expires) return Math.ceil((new Date(c.expires).getTime() - Date.now()) / 1000);
     return 30 * 24 * 60 * 60;
   }
-  _auth() { return { Authorization: 'Bearer ' + this.token }; }
   _warn() {
-    if (!this.missing) console.error('UPSTASH SESSION STORE FAILED — token/URL invalid or Out-of-region. Falling back to in-memory sessions.');
+    if (!this.missing) console.error('UPSTASH SESSION STORE FAILED — falling back to in-memory sessions.');
     this.missing = true;
   }
   get(sid, cb) {
     if (this.missing) return cb(null, this.mem.get(sid) || null);
-    fetch(this.url + '/get/' + this.prefix + sid, { headers: this._auth(), signal: AbortSignal.timeout(8000) })
-      .then((r) => r.json())
-      .then((j) => {
-        const raw = j && j.result !== null && j.result !== undefined ? JSON.parse(j.result) : null;
-        if (raw) {
-          const exp = raw.cookie && raw.cookie.expires ? new Date(raw.cookie.expires).getTime() : 0;
-          if (exp > 0 && exp <= Date.now()) {
-            this.destroy(sid, () => {});
-            return cb(null, null);
-          }
-          this.mem.set(sid, raw);
+    this.redis.get(this.prefix + sid).then((raw) => {
+      const sess = raw ? JSON.parse(raw) : null;
+      if (sess) {
+        const exp = sess.cookie && sess.cookie.expires ? new Date(sess.cookie.expires).getTime() : 0;
+        if (exp > 0 && exp <= Date.now()) {
+          this.destroy(sid, () => {});
+          return cb(null, null);
         }
-        cb(null, raw);
-      })
-      .catch((e) => { this._warn(); cb(null, this.mem.get(sid) || null); });
+        this.mem.set(sid, sess);
+      }
+      cb(null, sess);
+    }).catch((e) => { this._warn(); cb(null, this.mem.get(sid) || null); });
   }
   set(sid, sess, cb) {
     this.mem.set(sid, sess);
-    const val = encodeURIComponent(JSON.stringify(sess));
-    const px = this._ttl(sess);
-    fetch(this.url + '/set/' + encodeURIComponent(this.prefix + sid) + '/' + val + '/PX/' + px, {
-      method: 'POST',
-      headers: this._auth(),
-      signal: AbortSignal.timeout(8000)
-    }).then((r) => { if (!r.ok) throw new Error('upstash set ' + r.status); cb && cb(); })
+    this.redis.set(this.prefix + sid, JSON.stringify(sess), { px: this._ttl(sess) })
+      .then(() => cb && cb())
       .catch((e) => { this._warn(); cb && cb(); });
   }
   touch(sid, sess, cb) { this.set(sid, sess, cb); }
   destroy(sid, cb) {
     this.mem.delete(sid);
-    fetch(this.url + '/del/' + this.prefix + sid, { headers: this._auth(), signal: AbortSignal.timeout(8000) })
-      .then(() => { cb && cb(); })
-      .catch((e) => { this._warn(); cb && cb(); });
+    this.redis.del(this.prefix + sid).then(() => { cb && cb(); }).catch((e) => { this._warn(); cb && cb(); });
   }
 }
 
 async function probeUpstash() {
-  const probeKey = 'fx:probe';
   try {
-    const setRes = await fetch(
-      process.env.UPSTASH_REDIS_REST_URL + '/set/' + probeKey + '/ok',
-      { method: 'POST', headers: { Authorization: 'Bearer ' + process.env.UPSTASH_REDIS_REST_TOKEN }, signal: AbortSignal.timeout(8000) }
-    );
-    if (!setRes.ok) return 'HTTP ' + setRes.status;
-    const getRes = await fetch(process.env.UPSTASH_REDIS_REST_URL + '/get/' + probeKey, {
-      headers: { Authorization: 'Bearer ' + process.env.UPSTASH_REDIS_REST_TOKEN },
-      signal: AbortSignal.timeout(8000)
-    });
-    const j = await getRes.json();
-    return j.result === 'ok' ? null : 'probe mismatch';
+    const r = sessionStore.redis;
+    await r.set('fx:probe', 'ok');
+    const got = await r.get('fx:probe');
+    return got === 'ok' ? null : 'probe mismatch (got ' + JSON.stringify(got) + ')';
   } catch (e) {
     return String(e.message || e);
   }
 }
 
 const sessionStore = hasUpstash
-  ? new UpstashSessionStore({ url: process.env.UPSTASH_REDIS_REST_URL, token: process.env.UPSTASH_REDIS_REST_TOKEN })
+  ? new UpstashSessionStore(require('./lib/db').redisOf())
   : null;
 
 if (hasUpstash) {
