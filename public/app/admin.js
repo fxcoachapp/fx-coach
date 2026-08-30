@@ -137,14 +137,14 @@ document.getElementById('walletForm').addEventListener('submit', async (e) => {
   e.preventDefault();
   err.classList.remove('show');
   try {
-    await api('/api/admin/wallet', 'POST', {
+    const res = await api('/api/admin/wallet', 'POST', {
       TRC20: document.getElementById('wTRC20').value,
       BEP20: document.getElementById('wBEP20').value,
       ERC20: document.getElementById('wERC20').value
     });
     const s = document.getElementById('walletSaved');
-    s.textContent = 'Saved ✓';
-    setTimeout(() => { s.textContent = ''; }, 2000);
+    s.textContent = res.persisted === false ? '⚠ Saved in memory but NOT durable — Upstash write failing. Check Render logs.' : 'Saved ✓';
+    setTimeout(() => { s.textContent = ''; }, 4000);
   } catch (ex) {
     err.textContent = ex.message;
     err.classList.add('show');

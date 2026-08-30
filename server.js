@@ -9,7 +9,7 @@ const rateLimit = require('express-rate-limit');
 const QRCode = require('qrcode');
 const bcrypt = require('bcryptjs');
 
-const { init, users, trades, payments, config, storageMode, hasUpstash } = require('./lib/db');
+const { init, users, trades, payments, config, storageMode, hasUpstash, read: dbRead } = require('./lib/db');
 const { PLAN_PRICE, PLAN_CURRENCY, TRIAL_DAYS, REFERRAL_THRESHOLD, REFERRAL_BONUS_DAYS, accessStatus, renewalDate, extendPremium } = require('./lib/subscription');
 const { getQuotes } = require('./lib/forex');
 const marketLib = require('./lib/market');
@@ -481,7 +481,17 @@ app.post('/api/admin/wallet', apiUser, requireAdmin, async (req, res) => {
     if (v) next[key] = v;
   }
   await config.set('wallet', next);
-  res.json({ wallet: paymentsLib.walletConfig() });
+  let persisted = true;
+  if (hasUpstash) {
+    try {
+      const ver = await dbRead('config');
+      const arr = Array.isArray(ver) ? ver : [];
+      const stored = arr[0] && arr[0].wallet ? arr[0].wallet : {};
+      persisted = Object.keys(next).every((k) => String(stored[k] || '') === String(next[k]));
+    } catch { persisted = false; }
+  }
+  if (!persisted) console.error('[wallet] SAVE NOT DURABLE — Upstash write did not stick. Check UPSTASH_REDIS_REST_URL/TOKEN.');
+  res.json({ wallet: paymentsLib.walletConfig(), persisted });
 });
 
 app.post('/api/admin/wallet/binance-fetch', apiUser, requireAdmin, async (req, res) => {
