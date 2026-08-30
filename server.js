@@ -218,6 +218,7 @@ app.get('/api/csrf', (req, res) => {
 });
 
 const gateApp = (req, res, next) => {
+  if (/\.(js|mjs|css|png|jpe?g|gif|svg|ico|webp|woff2?|ttf|otf|eot|json|txt|map)$/i.test(req.path)) return next();
   if (!req.session.userId) return res.redirect('/login.html');
   if (req.url.startsWith('/subscribe')) return next();
   if (req.url.startsWith('/pay')) return next();
