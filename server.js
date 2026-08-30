@@ -76,9 +76,16 @@ class UpstashSessionStore extends session.Store {
     fetch(this.url + '/get/' + this.prefix + sid, { headers: this._auth(), signal: AbortSignal.timeout(8000) })
       .then((r) => r.json())
       .then((j) => {
-        const sess = j && j.result !== null && j.result !== undefined ? JSON.parse(j.result) : null;
-        if (sess) this.mem.set(sid, sess);
-        cb(null, sess);
+        const raw = j && j.result !== null && j.result !== undefined ? JSON.parse(j.result) : null;
+        if (raw) {
+          const exp = raw.cookie && raw.cookie.expires ? new Date(raw.cookie.expires).getTime() : 0;
+          if (exp > 0 && exp <= Date.now()) {
+            this.destroy(sid, () => {});
+            return cb(null, null);
+          }
+          this.mem.set(sid, raw);
+        }
+        cb(null, raw);
       })
       .catch((e) => { this._warn(); cb(null, this.mem.get(sid) || null); });
   }
@@ -87,7 +94,7 @@ class UpstashSessionStore extends session.Store {
     const body = new URLSearchParams({ key: this.prefix + sid, value: JSON.stringify(sess) });
     fetch(this.url + '/set', {
       method: 'POST',
-      headers: Object.assign(this._auth(), { 'Content-Type': 'application/x-www-form-urlencoded', 'Cache-Control': 'max-age=' + this._ttl(sess) }),
+      headers: Object.assign(this._auth(), { 'Content-Type': 'application/x-www-form-urlencoded' }),
       body: body.toString(),
       signal: AbortSignal.timeout(8000)
     }).then((r) => { if (!r.ok) throw new Error('upstash set ' + r.status); cb && cb(); })
@@ -108,7 +115,7 @@ async function probeUpstash() {
     const setBody = new URLSearchParams({ key: probeKey, value: 'ok' });
     const setRes = await fetch(process.env.UPSTASH_REDIS_REST_URL + '/set', {
       method: 'POST',
-      headers: { Authorization: 'Bearer ' + process.env.UPSTASH_REDIS_REST_TOKEN, 'Content-Type': 'application/x-www-form-urlencoded', 'Cache-Control': 'max-age=3600' },
+      headers: { Authorization: 'Bearer ' + process.env.UPSTASH_REDIS_REST_TOKEN, 'Content-Type': 'application/x-www-form-urlencoded' },
       body: setBody.toString(),
       signal: AbortSignal.timeout(8000)
     });
