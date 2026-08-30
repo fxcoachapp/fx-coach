@@ -12,98 +12,177 @@
   <link rel="stylesheet" href="/styles.css" />
 </head>
 <body>
-  <nav class="nav">
+  <div class="orb orb-a"></div>
+  <div class="orb orb-b"></div>
+  <div class="orb orb-c"></div>
+
+  <nav class="nav" id="topNav">
     <a class="brand" href="/" style="color:inherit"><span class="logo">F</span>FX<span>Coach</span></a>
     <div class="nav-links">
+      <a class="btn btn-ghost" href="#how">How it works</a>
+      <a class="btn btn-ghost" href="#pricing">Pricing</a>
       <a class="btn" href="/login.html">Log in</a>
-      <a class="btn btn-gold" href="/signup.html">Start free trial</a>
+      <a class="btn btn-gold btn-shine" href="/signup.html">Start free trial</a>
     </div>
   </nav>
 
   <section class="hero">
-    <div class="pill">★ 7-day free trial · Pay with USDT (crypto)</div>
-    <h1>Your AI coach for<br />forex &amp; <span class="gold">currency trading</span></h1>
-    <p>Log every trade, get instant AI feedback on discipline, risk and psychology, size positions safely, and see your real edge in black and white.</p>
-    <div class="buttons">
-      <a class="btn btn-gold" href="/signup.html">Start free trial</a>
-      <a class="btn" href="#pricing">See pricing</a>
-    </div>
-    <div class="signal">
-      <span><b>Live FX rates</b></span>
-      <span><b>AI coach</b></span>
-      <span><b>Trade journal</b></span>
-      <span><b>Risk calculator</b></span>
+    <div class="pill anim-up d1">★ 7-day free trial · Pay with USDT (crypto)</div>
+    <h1 class="anim-up d2">Your AI coach for<br />forex &amp; <span class="gold">currency trading</span></h1>
+    <p class="anim-up d3">Log every trade, get instant AI feedback on discipline, risk and psychology, size positions safely, and see your real edge in black and white.</p>
+    <div class="buttons anim-up d4">
+      <a class="btn btn-gold btn-shine" href="/signup.html">Start free trial</a>
+      <a class="btn" href="#how">See how it works</a>
     </div>
 
-    <div class="hero-card">
-      <div class="quote-grid">
-        <div class="quote-card"><div class="sym"><span>EUR/USD</span></div><div class="price">1.0842</div><div class="chg up">+0.11%</div></div>
-        <div class="quote-card"><div class="sym"><span>GBP/USD</span></div><div class="price">1.2718</div><div class="chg up">+0.16%</div></div>
-        <div class="quote-card"><div class="sym"><span>USD/JPY</span></div><div class="price">151.42</div><div class="chg down">−0.18%</div></div>
-        <div class="quote-card"><div class="sym"><span>XAU/USD</span></div><div class="price">2335.4</div><div class="chg up">+0.59%</div></div>
-        <div class="quote-card"><div class="sym"><span>USD/TRY</span></div><div class="price">32.48</div><div class="chg up">+0.18%</div></div>
-        <div class="quote-card"><div class="sym"><span>AUD/USD</span></div><div class="price">0.6558</div><div class="chg up">+0.21%</div></div>
+    <div class="signal anim-up d5">
+      <span>⚡ <b>Live FX rates</b></span>
+      <span>🤖 <b>AI coach</b></span>
+      <span>📓 <b>Trade journal</b></span>
+      <span>⚖️ <b>Risk calculator</b></span>
+      <span>⏱️ <b>Best sessions</b></span>
+    </div>
+
+    <div class="hero-card anim-up d5" id="spotlight">
+      <div class="live-dot"><span class="dot"></span> Live market feed</div>
+      <div class="ticker-wrap"><div class="ticker-track" id="tickerTrack">
+        <div class="ticker-item"><div class="sym"><span>EUR/USD</span><span class="fl">FX</span></div><div class="price">1.0842</div><div class="chg up">▲ +0.11%</div></div>
+        <div class="ticker-item"><div class="sym"><span>GBP/USD</span><span class="fl">FX</span></div><div class="price">1.2718</div><div class="chg up">▲ +0.16%</div></div>
+        <div class="ticker-item"><div class="sym"><span>USD/JPY</span><span class="fl red">FX</span></div><div class="price">151.42</div><div class="chg down">▼ −0.18%</div></div>
+        <div class="ticker-item"><div class="sym"><span>XAU/USD</span><span class="fl gold">XAU</span></div><div class="price">2335.4</div><div class="chg up">▲ +0.59%</div></div>
+        <div class="ticker-item"><div class="sym"><span>USD/TRY</span><span class="fl gold">TRY</span></div><div class="price">32.48</div><div class="chg up">▲ +0.18%</div></div>
+        <div class="ticker-item"><div class="sym"><span>AUD/USD</span><span class="fl">FX</span></div><div class="price">0.6558</div><div class="chg up">▲ +0.21%</div></div>
+        <div class="ticker-item"><div class="sym"><span>USD/CAD</span><span class="fl red">FX</span></div><div class="price">1.3621</div><div class="chg down">▼ −0.09%</div></div>
+        <div class="ticker-item"><div class="sym"><span>NZD/USD</span><span class="fl">FX</span></div><div class="price">0.6124</div><div class="chg up">▲ +0.12%</div></div>
+        <div class="ticker-item"><div class="sym"><span>USD/CHF</span><span class="fl red">FX</span></div><div class="price">0.9047</div><div class="chg down">▼ −0.23%</div></div>
+        <div class="ticker-item"><div class="sym"><span>EUR/GBP</span><span class="fl">FX</span></div><div class="price">0.8526</div><div class="chg up">▲ +0.05%</div></div>
+      </div></div>
+      <div class="hero-foot">
+        <span><b>Unlimited journal</b></span>
+        <span><b>AI on every entry</b></span>
+        <span><b>USDT payments</b></span>
       </div>
     </div>
   </section>
 
-  <section class="section container">
+  <section class="section container" data-reveal>
     <div class="eyebrow">Why traders stick with us</div>
     <h2>Built for people who keep score</h2>
     <p class="sub">Most people lose money because they never know what works. We fix that.</p>
     <div class="grid">
-      <div class="card">
-        <div class="icon">📓</div>
+      <div class="card tilt-card">
+        <div class="icon">🤖</div>
         <h3>AI Trade Coach</h3>
         <p>Every logged trade gets a scored review of discipline, risk and psychology — with concrete fixes you can act on.</p>
       </div>
-      <div class="card gold">
+      <div class="card gold tilt-card">
         <div class="icon">📊</div>
         <h3>Trade Journal</h3>
         <p>Win rate, average R, profit factor, streaks. Your edge becomes measurable, repeatable and real.</p>
       </div>
-      <div class="card">
+      <div class="card tilt-card">
         <div class="icon">⚖️</div>
         <h3>Position Calculator</h3>
         <p>Never risk more than you plan. One-click lot sizing from your balance, risk % and stop distance.</p>
       </div>
-      <div class="card gold">
+      <div class="card gold tilt-card">
         <div class="icon">💱</div>
         <h3>Live FX Rates</h3>
-        <p>Major pairs and crosses with real-time pricing, refreshed automatically while you trade.</p>
+        <p>Major pairs and crosses with real-time pricing plus the best market session windows — refreshed automatically.</p>
       </div>
     </div>
   </section>
 
-  <section class="section container" id="pricing">
-    <div class="eyebrow">Pricing</div>
-    <h2>Simple, honest pricing</h2>
-    <div class="pricing" style="margin-top:26px">
-      <div class="plan-card">
-        <h3>Free Trial</h3>
-        <div class="price">$0<small> / 7 days</small></div>
-        <ul>
-          <li>Full access — no card required</li>
-          <li>Live FX rates</li>
-          <li>Unlimited journal entries</li>
-          <li>AI coach reviews</li>
-        </ul>
-        <a class="btn" href="/signup.html">Start free</a>
+  <section class="stats-band" data-reveal>
+    <div class="stat-item"><div class="val">7 <small>days</small></div><div class="lbl">free trial — no card</div></div>
+    <div class="stat-item"><div class="val">100<small>%</small></div><div class="lbl">crypto-friendly (USDT)</div></div>
+    <div class="stat-item"><div class="val">360<small>°</small></div><div class="lbl">AI coach on every entry</div></div>
+    <div class="stat-item"><div class="val">$10<small>/mo</small></div><div class="lbl">transparent pricing</div></div>
+  </section>
+
+  <section class="section container" id="how">
+    <div class="eyebrow">How it works</div>
+    <h2>Your edge, in three steps</h2>
+    <p class="sub">No spreadsheets, no guesswork. Close the loop on every single trade.</p>
+    <div class="steps">
+      <div class="step tilt-card">
+        <div class="step-num">1</div>
+        <h3>Log the trade</h3>
+        <p>Entry, exit, risk, psychology state — captured in seconds from anywhere, on any device.</p>
       </div>
-      <div class="plan-card plan-featured">
-        <div class="tag-ribbon">MOST POPULAR</div>
-        <h3>Pro</h3>
-        <div class="plan-bar"><div class="price">$10<small> / month</small></div><div><span class="tag">Pay with USDT</span></div></div>
-        <ul>
-          <li>Everything in the trial, forever</li>
-          <li>Weekly AI progress reports</li>
-          <li>Priority ideas &amp; alerts</li>
-          <li>Crypto payment — TRC-20 / BEP-20 / ERC-20</li>
-          <li>Access locks automatically if payment lapses</li>
-        </ul>
-        <a class="btn btn-gold" href="/signup.html">Get started</a>
+      <div class="step tilt-card">
+        <div class="step-num">2</div>
+        <h3>Coach reviews it</h3>
+        <p>Get an instant, scored breakdown of discipline, risk and psychology with fixes you can apply tomorrow.</p>
+      </div>
+      <div class="step tilt-card">
+        <div class="step-num">3</div>
+        <h3>See your real edge</h3>
+        <p>Win rate, profit factor, best and worst pairs, timing. Only trade what provably works for you.</p>
       </div>
     </div>
+  </section>
+
+  <section class="section container" id="faq">
+    <div class="eyebrow">Questions</div>
+    <h2>Before you ask</h2>
+    <div class="faq-teaser">
+      <details>
+        <summary>Do I need a credit card? <span class="chev">⌄</span></summary>
+        <p>No. Start free for 7 days, then upgrade with USDT (TRC-20 / BEP-20 / ERC-20) when it's working for you.</p>
+      </details>
+      <details>
+        <summary>Is the AI coach financial advice? <span class="chev">⌄</span></summary>
+        <p>No. It reviews your discipline, risk and psychology. Trading decisions stay yours — and so does the risk.</p>
+      </details>
+      <details>
+        <summary>What happens if I don't renew? <span class="chev">⌄</span></summary>
+        <p>Access locks automatically until you pay again. Your journal data stays safe and is restored the moment you unlock.</p>
+      </details>
+      <details>
+        <summary>Can I invite friends? <span class="chev">⌄</span></summary>
+        <p>Yes. For every 5 friends who sign up through your link <b>and subscribe</b>, you get 15 extra days free.</p>
+      </details>
+    </div>
+  </section>
+
+  <section class="section" id="pricing">
+    <div class="container">
+      <div class="eyebrow">Pricing</div>
+      <h2>Simple, honest pricing</h2>
+      <div class="pricing" style="margin-top:26px">
+        <div class="plan-card tilt-card">
+          <h3>Free Trial</h3>
+          <div class="price">$0<small> / 7 days</small></div>
+          <ul>
+            <li>Full access — no card required</li>
+            <li>Live FX rates</li>
+            <li>Unlimited journal entries</li>
+            <li>AI coach reviews</li>
+          </ul>
+          <a class="btn btn-block" href="/signup.html">Start free</a>
+        </div>
+        <div class="plan-card plan-featured tilt-card">
+          <div class="tag-ribbon">MOST POPULAR</div>
+          <h3>Pro</h3>
+          <div class="plan-bar"><div class="price">$10<small> / month</small></div><div><span class="tag">Pay with USDT</span></div></div>
+          <ul>
+            <li>Everything in the trial, forever</li>
+            <li>Weekly AI progress reports</li>
+            <li>Priority ideas &amp; alerts</li>
+            <li>Crypto payment — TRC-20 / BEP-20 / ERC-20</li>
+            <li>Access locks automatically if payment lapses</li>
+          </ul>
+          <a class="btn btn-gold btn-shine btn-block" href="/signup.html">Get started</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="cta-band container" data-reveal>
+    <h2>Stop guessing. Start scoring.</h2>
+    <p>Seven days free. Pay later with USDT — only if it works.</p>
+    <a class="btn btn-gold btn-shine btn-large" href="/signup.html">Start your free trial</a>
   </section>
 
   <div class="notice container">Trading forex carries a high level of risk and may not be suitable for all investors. FX Coach is an educational and analytical tool — it is not financial advice.</div>
@@ -111,5 +190,7 @@
   <footer>
     <div class="container">FXCoach © 2026 — built for traders who keep score.</div>
   </footer>
+
+  <script src="/landing.js"></script>
 </body>
 </html>
