@@ -55,7 +55,7 @@ app.use(session({
   secret: process.env.SESSION_SECRET || 'dev-secret-change-me',
   resave: false,
   saveUninitialized: false,
-  rolling: true,
+  rolling: false,
   cookie: {
     httpOnly: true,
     sameSite: 'lax',
