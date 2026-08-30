@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Position Calculator — FX Coach</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/styles.css" />
+</head>
+<body data-page="calculator">
+  <div id="nav"></div>
+
+  <div class="app-main" style="max-width:770px">
+    <h1 class="page-title">Position Size Calculator</h1>
+    <p class="page-sub">Never risk more than you plan. Enter your account size, risk % and stop, and get your lot size instantly.</p>
+
+    <div class="err" id="err"></div>
+    <div class="card">
+      <form id="calcForm">
+        <div class="two-col" style="gap:10px">
+          <div class="field"><label>Account balance (USD)</label><input id="balance" type="number" step="any" required value="5000" /></div>
+          <div class="field"><label>Risk % per trade</label><input id="riskPercent" type="number" step="any" required value="1" /></div>
+        </div>
+        <div class="two-col" style="gap:10px">
+          <div class="field">
+            <label>Pair</label>
+            <select id="pair">
+              <option>EURUSD</option><option>GBPUSD</option><option>USDJPY</option>
+              <option>USDCAD</option><option>AUDUSD</option><option>USDCHF</option>
+              <option>NZDUSD</option><option>XAUUSD</option><option>EURJPY</option>
+              <option>EURGBP</option><option>GBPJPY</option><option>AUDJPY</option>
+            </select>
+          </div>
+          <div class="field"><label>Entry price</label><input id="entry" type="number" step="any" required value="1.0845" /></div>
+        </div>
+        <div class="two-col" style="gap:10px">
+          <div class="field"><label>Stop loss price</label><input id="stop" type="number" step="any" required value="1.0790" /></div>
+          <div class="field"><label>Take profit price (optional)</label><input id="tp" type="number" step="any" placeholder="1.0950" /></div>
+        </div>
+        <button class="btn btn-primary btn-block" type="submit">Calculate lot size</button>
+      </form>
+    </div>
+
+    <div id="result" class="hidden" style="margin-top:20px"></div>
+  </div>
+
+  <script src="/app/app.js"></script>
+  <script src="/app/calculator.js"></script>
+</body>
+</html>

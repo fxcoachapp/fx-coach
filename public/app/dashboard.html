@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dashboard — FX Coach</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/styles.css" />
+</head>
+<body data-page="dashboard">
+  <div id="nav"></div>
+
+  <div class="app-main">
+    <h1 class="page-title">Dashboard</h1>
+    <p class="page-sub" id="statusLine">Loading your workspace…</p>
+
+    <div id="expiredBanner" class="banner wall hidden">
+      <b>Access expired.</b> Renewing takes ~30 seconds with USDT — <a href="/app/subscribe.html" style="color:inherit;text-decoration:underline;font-weight:700">Renew now</a>
+    </div>
+
+    <div class="two-col mt">
+      <div>
+        <h2 style="font-size:18px;margin-bottom:12px">Your edge at a glance</h2>
+        <div class="stat-row" id="stats">
+          <div class="stat"><div class="label">Trades</div><div class="value" id="sTotal">—</div></div>
+          <div class="stat"><div class="label">Win rate</div><div class="value" id="sWin">—</div></div>
+          <div class="stat"><div class="label">Avg R</div><div class="value" id="sR">—</div></div>
+          <div class="stat"><div class="label">Profit factor</div><div class="value" id="sPF">—</div></div>
+          <div class="stat"><div class="label">Coach score</div><div class="value gold" id="sScore">—</div></div>
+        </div>
+        <div class="coach" id="coachBox">
+          <p class="small">Open your <a href="/app/journal.html">journal</a> and log a few trades — your AI coach summary appears here.</p>
+        </div>
+      </div>
+
+      <div>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+          <h2 style="font-size:18px">Live FX rates</h2>
+          <span class="tag" id="quoteTime">…</span>
+        </div>
+        <div class="quote-grid" id="quotes"></div>
+      </div>
+    </div>
+  </div>
+
+  <script src="/app/app.js"></script>
+  <script src="/app/dashboard.js"></script>
+</body>
+</html>

@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pay with USDT — FX Coach</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/styles.css" />
+</head>
+<body data-page="subscribe">
+  <div id="nav"></div>
+
+  <div class="app-main" style="max-width:760px">
+    <div id="success" class="notice hidden" style="font-size:15px;font-weight:600;background:rgba(34,197,94,0.14);border-color:rgba(34,197,94,0.5)">
+      ✓ Payment confirmed! Your Pro access is active — <a href="/app/dashboard.html" style="font-weight:700;text-decoration:underline">go to dashboard</a>
+    </div>
+
+    <div id="expiredNote" class="banner wall hidden">
+      <b>This payment request expired.</b> <a href="/app/subscribe.html" style="color:inherit;text-decoration:underline;font-weight:700">Start a new one</a>
+    </div>
+
+    <h1 class="page-title">Pay with USDT</h1>
+    <p class="page-sub" id="paySub">Loading…</p>
+
+    <div class="err" id="err"></div>
+
+    <div class="two-col">
+      <div>
+        <div class="pay-panel" id="panel">
+          <div class="text-center" id="loadingSlot">Loading payment…</div>
+        </div>
+      </div>
+      <div>
+        <h2 style="font-size:17px;margin-bottom:12px">Or switch network</h2>
+        <div id="networks" class="network-grid" style="grid-template-columns:repeat(auto-fit,minmax(160px,1fr))"></div>
+
+        <div class="card mt">
+          <h3 style="font-size:15px;margin-bottom:8px">How it works</h3>
+          <ol style="color:var(--muted);font-size:13.5px;padding-left:18px;line-height:2">
+            <li>Open your wallet (e.g. Binance or Trust Wallet).</li>
+            <li>Send <b style="color:var(--text)">USDT</b> to the address shown, on the <b style="color:var(--text)">same network</b> you chose.</li>
+            <li>Access unlocks automatically once the transfer is confirmed on-chain (usually &lt; 1 min).</li>
+            <li>Wrong network = money lost. Always double-check the network.</li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="/app/app.js"></script>
+  <script src="/app/pay.js"></script>
+</body>
+</html>

@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin — FX Coach</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/styles.css" />
+</head>
+<body data-page="admin">
+  <div id="nav"></div>
+
+  <div class="app-main">
+    <h1 class="page-title">Owner panel</h1>
+    <p class="page-sub">Payments, revenue and your receiving wallet. Only you can see this page.</p>
+
+    <div class="err" id="err"></div>
+
+    <div class="stat-row">
+      <div class="stat"><div class="label">Users</div><div class="value" id="oUsers">—</div></div>
+      <div class="stat"><div class="label">Active (paid)</div><div class="value green" id="oActive">—</div></div>
+      <div class="stat"><div class="label">Trials</div><div class="value" id="oTrials">—</div></div>
+      <div class="stat"><div class="label">Expired</div><div class="value red" id="oExpired">—</div></div>
+      <div class="stat"><div class="label">Revenue (USDT)</div><div class="value gold" id="oRevenue">—</div></div>
+      <div class="stat"><div class="label">Pending pays</div><div class="value" id="oPending">—</div></div>
+    </div>
+
+    <div class="card">
+      <h3 style="font-size:17px;margin-bottom:16px">Receiving wallets (USDT)</h3>
+      <form id="walletForm">
+        <div class="two-col" style="gap:10px">
+          <div class="field">
+            <label>TRC-20 address (TRON — recommended)</label>
+            <input id="wTRC20" type="text" placeholder="T…" autocomplete="off" />
+            <div style="margin-top:6px"><button class="btn btn-sm" type="button" data-fetch="TRC20">Auto-fetch from Binance (TRON)</button></div>
+          </div>
+          <div class="field">
+            <label>BEP-20 address (BNB Smart Chain)</label>
+            <input id="wBEP20" type="text" placeholder="0x…" autocomplete="off" />
+            <div style="margin-top:6px"><button class="btn btn-sm" type="button" data-fetch="BEP20">Auto-fetch from Binance (BSC)</button></div>
+          </div>
+          <div class="field">
+            <label>ERC-20 address (Ethereum)</label>
+            <input id="wERC20" type="text" placeholder="0x…" autocomplete="off" />
+            <div style="margin-top:6px"><button class="btn btn-sm" type="button" data-fetch="ERC20">Auto-fetch from Binance (ETH)</button></div>
+          </div>
+        </div>
+        <button class="btn btn-primary" type="submit">Save wallet</button>
+        <span class="small" id="walletSaved"></span>
+      </form>
+      <div class="warn-box mt">
+        <b>Security note:</b> set these addresses to <b>your own</b> Binance deposit addresses. They are only ever sent to browsers from the server — they are never stored in page source, so a hacker cannot edit the QR or the address. The "auto-fetch" button reads your deposit address from Binance using a <b>read-only API key</b> (never give the key withdrawal or trading permissions).
+      </div>
+    </div>
+
+    <h2 style="font-size:17px;margin:30px 0 12px">Payments</h2>
+    <div class="card">
+      <div id="paymentsTable"><p class="empty">Loading…</p></div>
+    </div>
+  </div>
+
+  <script src="/app/app.js"></script>
+  <script src="/app/admin.js"></script>
+</body>
+</html>

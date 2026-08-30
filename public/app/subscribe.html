@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Your Plan — FX Coach</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/styles.css" />
+</head>
+<body data-page="subscribe">
+  <div id="nav"></div>
+
+  <div class="app-main" style="max-width:760px">
+    <div id="wall" class="hidden">
+      <div class="banner wall" style="border-radius:14px;margin-bottom:22px">
+        <b>Access locked.</b> Payment is due. Pay below with USDT and access unlocks automatically — usually within a minute of confirmation.
+      </div>
+    </div>
+
+    <h1 class="page-title">Upgrade to Pro</h1>
+    <p class="page-sub" id="statusLine">Loading…</p>
+
+    <div class="err" id="err"></div>
+
+    <div class="card plan-featured" style="margin-bottom:24px">
+      <div class="plan-bar">
+        <div>
+          <h3 style="margin-bottom:6px">FX Coach Pro</h3>
+          <div class="price">$10<small> / month</small></div>
+        </div>
+        <div><span class="badge badge-paid">USDT ONLY</span></div>
+      </div>
+      <ul style="margin:18px 0 0;list-style:none;color:#c7d0ec;font-size:14px">
+        <li style="padding:5px 0">✓ Full access after payment lands on-chain</li>
+        <li style="padding:5px 0">✓ Auto-renew: pay again when your month ends</li>
+        <li style="padding:5px 0">✓ Access locks automatically if you don't renew</li>
+      </ul>
+    </div>
+
+    <h2 style="font-size:17px;margin:20px 0 12px">Choose a payment network</h2>
+    <div id="networks" class="network-grid"></div>
+    <p class="small mt" id="netHint"></p>
+
+    <div class="warn-box mt">
+      <b>Owner demo:</b> a test button below simulates a failed payment — it locks the app instantly to prove the paywall works.
+    </div>
+    <div class="mt" style="display:flex;gap:10px;flex-wrap:wrap">
+      <button class="btn" id="simulateBtn">Simulate payment failure → lock access</button>
+    </div>
+  </div>
+
+  <script src="/app/app.js"></script>
+  <script src="/app/subscribe.js"></script>
+</body>
+</html>
