@@ -140,6 +140,8 @@ document.querySelectorAll('[data-fetch]').forEach((b) => b.addEventListener('cli
   b.disabled = false; b.classList.remove('spinner');
 }));
 
+grantVip();
+
 initApp().then((user) => {
   if (!user) return;
   if (!user.admin) { location.href = '/app/dashboard.html'; return; }
@@ -148,5 +150,4 @@ initApp().then((user) => {
   loadUsers();
   loadPayments();
   loadWallet();
-  grantVip();
 });

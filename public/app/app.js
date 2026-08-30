@@ -1,9 +1,20 @@
 let __csrf = '';
-async function ensureCsrf() {
+let __csrfRefreshing = false;
+async function ensureCsrf(force) {
   try {
-    const p = /csrf=([^;]+)/.exec(document.cookie);
-    if (p) __csrf = decodeURIComponent(p[1]);
-    if (!__csrf) __csrf = (await (await fetch('/api/csrf')).json()).token;
+    if (force || !__csrf) {
+      if (__csrfRefreshing) {
+        await __csrfRefreshing;
+        return __csrf;
+      }
+      __csrfRefreshing = (async () => {
+        const p = /csrf=([^;]+)/.exec(document.cookie);
+        if (force || !p) __csrf = decodeURIComponent(p ? p[1] : '');
+        if (!__csrf) __csrf = (await (await fetch('/api/csrf')).json()).token;
+      })();
+      await __csrfRefreshing;
+      __csrfRefreshing = false;
+    }
   } catch (e) { /* ignore */ }
   return __csrf;
 }
@@ -19,14 +30,17 @@ async function getMe() {
   }
 }
 
-async function api(path, method, body) {
-  await ensureCsrf();
+async function api(path, method, body, _retried) {
   const opts = { method: method || 'GET', headers: { 'Accept': 'application/json' } };
-  opts.headers['X-CSRF-Token'] = __csrf;
+  opts.headers['X-CSRF-Token'] = await ensureCsrf();
   if (body) { opts.headers['Content-Type'] = 'application/json'; opts.body = JSON.stringify(body); }
   const res = await fetch(path, opts);
   if (res.status === 401) { location.href = '/login.html'; throw new Error('Not logged in.'); }
   const data = await res.json().catch(() => ({}));
+  if (res.status === 403 && !_retried && /security token/i.test(data.error || '')) {
+    await ensureCsrf(true);
+    return api(path, method, body, true);
+  }
   if (res.status === 404 && !res.ok) throw new Error(data.error || 'Not found.');
   if (res.status === 403 && data.code === 'PAYMENT_REQUIRED') {
     if (!location.pathname.endsWith('subscribe.html')) location.href = '/app/subscribe.html';
